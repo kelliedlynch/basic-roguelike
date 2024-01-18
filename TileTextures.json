@@ -1,0 +1,30 @@
+[
+  {
+    "TileType": "Floor",
+    "SpriteSheet": "monochrome-transparent_packed",
+    "TextureLocationX": 2,
+    "TextureLocationY": 0,
+    "ColorName": "DarkSlateGray"
+  },
+  {
+    "TileType": "Hallway",
+    "SpriteSheet": "monochrome-transparent_packed",
+    "TextureLocationX": 2,
+    "TextureLocationY": 0,
+    "ColorName": "DarkSlateGray"
+  },
+  {
+    "TileType": "Wall",
+    "SpriteSheet": "monochrome-transparent_packed",
+    "TextureLocationX": 10,
+    "TextureLocationY": 17,
+    "ColorName": "White"
+  },
+  {
+    "TileType": "Void",
+    "SpriteSheet": "monochrome-transparent_packed",
+    "TextureLocationX": 0,
+    "TextureLocationY": 0,
+    "ColorName": "Black"
+  }
+]
