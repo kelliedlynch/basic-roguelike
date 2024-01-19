@@ -3,21 +3,19 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Roguelike.Content.Entity;
+using Roguelike.Content.Entity.Creature;
 
 namespace Roguelike;
 
-public class Player : Entity
+public class Player : Creature
 {
 
 
 
-    public Pathfinder Pathfinder = new ();
+
     
     public Player()
     {
-        // var content = new ContentManager(provider, "Content");
-        // SpriteSheet = content.Load<Texture2D>("Graphics/monochrome-transparent_packed");
-        SpriteSheet = ("Graphics/monochrome-transparent_packed");
         SpriteLocation = new IntVector2(27, 0);
     }
 

@@ -145,11 +145,8 @@ public class MapGenerator
         PlaceStairsUp(map);
         PlaceStairsDown(map);
 
-        
-        // Spawn in player next to stairs
-        // var t = _random.Next(0, 7);
-        // var adj = GetAdjacentTiles(new IntVector2(_stairsUp.Location.X, _stairsUp.Location.Y), 2);
-        // _player.Location = adj[t].Location;
+        SetDefaultEntryPoint(map);
+
         return map;
     }
 
@@ -246,4 +243,19 @@ public class MapGenerator
         }
     }
     
+    public void SetDefaultEntryPoint(TileMap map)
+    {
+        var t = _random.Next(0, 7);
+        var adj = map.GetAdjacentTiles(new IntVector2(map.StairsUp.Location.X, map.StairsUp.Location.Y), 2);
+        map.EntryPoint = adj[t].Location;
+    }
+    
+}
+
+public class ValidLocationNotFoundException : SystemException
+{
+    public ValidLocationNotFoundException(string message)
+    {
+        Console.WriteLine(message);
+    }
 }

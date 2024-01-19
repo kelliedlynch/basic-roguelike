@@ -12,6 +12,7 @@ public class TileMap
     public readonly List<Feature>[,] Features;
     public StairsDown StairsDown;
     public StairsUp StairsUp;
+    public IntVector2 EntryPoint;
     
     public TileMap(int width, int height)
     {
