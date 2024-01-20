@@ -13,16 +13,18 @@ public class RoguelikeGame : Game
     public DrawEngine DrawEngine;
     public EnemyManager EnemyManager;
     public PlayerManager PlayerManager;
+    public MapManager MapManager;
+    public InputManager InputManager;
     public Player Player;
 
     public event EventHandler BeginGame;
 
 
-    private void OnBeginGame(EventArgs e)
-    {
-        var beginGame = BeginGame;
-        beginGame?.Invoke(this, e);
-    }
+    // private void OnBeginGame(EventArgs e)
+    // {
+    //     var beginGame = BeginGame;
+    //     beginGame?.Invoke(this, e);
+    // }
     
     public RoguelikeGame()
     {
@@ -40,15 +42,25 @@ public class RoguelikeGame : Game
         DrawEngine = new DrawEngine(this);
         Components.Add(DrawEngine);
         Services.AddService(typeof(DrawEngine), DrawEngine);
+        
         PlayerManager = new PlayerManager(this);
         Components.Add(PlayerManager);
         Services.AddService(typeof(PlayerManager), PlayerManager);
+
+        MapManager = new MapManager(this);
+        Components.Add(MapManager);
+        Services.AddService(typeof(MapManager), MapManager);
+        
         EnemyManager = new EnemyManager(this);
         Components.Add(EnemyManager);
         Services.AddService(typeof(EnemyManager), EnemyManager);
 
+        InputManager = new InputManager(this);
+        Components.Add(InputManager);
+        Services.AddService(typeof(InputManager), InputManager);
 
-        
+
+
         base.Initialize();
     }
 
@@ -59,7 +71,7 @@ public class RoguelikeGame : Game
 
     protected override void BeginRun()
     {
-        OnBeginGame(EventArgs.Empty);
+        BeginGame?.Invoke(this, EventArgs.Empty);
         
         base.BeginRun();
     }
@@ -71,7 +83,7 @@ public class RoguelikeGame : Game
 
         if (Keyboard.GetState().IsKeyDown(Keys.Space))
         {
-            OnBeginGame(EventArgs.Empty);
+            BeginGame?.Invoke(this, EventArgs.Empty);
             // EnemyManager.Enemies = new List<Creature>();
             // PlayerManager.SpawnInPlayer(DrawEngine.TileMap);
         }

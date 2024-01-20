@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection.Metadata.Ecma335;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Roguelike.Content.Entity;
 using Roguelike.Content.Entity.Creature;
 
 namespace Roguelike;
@@ -10,8 +11,6 @@ namespace Roguelike;
 public class EnemyManager : DrawableGameComponent
 {
     public List<Creature> Enemies = new();
-    public Player Player;
-    public TileMap Map;
     private Random _random = new();
 
     public EnemyManager(RoguelikeGame game) : base(game)
@@ -27,12 +26,15 @@ public class EnemyManager : DrawableGameComponent
 
     public void BeginGame(object sender, EventArgs e)
     {
-        Player = Game.Services.GetService<PlayerManager>().Player;
-        Map = Game.Services.GetService<DrawEngine>().TileMap;
         Enemies = new List<Creature>();
         PlaceEnemies();
     }
 
+    private void RunSpawnCycle()
+    {
+        
+    }
+    
     public void PlaceEnemies()
     {
         do
@@ -43,12 +45,43 @@ public class EnemyManager : DrawableGameComponent
     
     private void SpawnNewEnemy()
     {
-        var map = Game.Services.GetService<DrawEngine>().TileMap;
+        var map = Game.Services.GetService<MapManager>().CurrentMap;
         var enemy = new Creature();
-        var loc = FindValidSpawnLocation(map, enemy);
-        if (loc is null) return;
-        enemy.Location = loc.Value;
+        var shouldAddEnemy = true;
+        try
+        {
+            var loc = FindValidSpawnLocation(map, enemy);
+            enemy.Location = loc;
+        }
+        catch (PathfinderException e)
+        {
+            // ENEMY WAS PLACED IN INVALID POSITION (NO PATH TO PLAYER)
+            enemy.Color = Color.Crimson;
+        }
+        catch (NoValidLocationException e)
+        {
+            // NO VALID LOCATION EXISTS FOR ENEMY
+            shouldAddEnemy = false;
+        }
+        finally
+        {
+            if (shouldAddEnemy)
+            {
+                AddEnemyToWorld(enemy);
+            }
+        }
+    }
+
+    private void AddEnemyToWorld(Creature enemy)
+    {
         Enemies.Add(enemy);
+        enemy.CreatureWasDestroyed += RemoveEnemyFromWorld;
+    }
+
+    private void RemoveEnemyFromWorld(object sender, EventArgs args)
+    {
+        var enemy = (Creature)sender;
+        Enemies.Remove(enemy);
     }
 
     private bool EnemyCapReached()
@@ -56,8 +89,9 @@ public class EnemyManager : DrawableGameComponent
         return Enemies.Count > 10;
     }
 
-    private IntVector2? FindValidSpawnLocation(TileMap map, Creature enemy)
+    private IntVector2 FindValidSpawnLocation(TileMap map, Creature enemy)
     {
+        var attempts = 200;
         var player = Game.Services.GetService<PlayerManager>().Player;
         var pathfinder = new Pathfinder();
         var i = 0;
@@ -71,7 +105,7 @@ public class EnemyManager : DrawableGameComponent
             if (path == null)
             {
                 //TODO: NEED TO FIND OUT WHY PATH IS SOMETIMES NULL
-                Console.WriteLine($"Could not find path from {tile.Location} to {player.Location}");
+                throw new PathfinderException($"Could not find path from {tile.Location} to {player.Location}");
             }
             if (path.Count < 7)
             {
@@ -80,27 +114,28 @@ public class EnemyManager : DrawableGameComponent
             }
 
             return tile.Location;
-        } while (i < 200);
-
-        return null;
+        } while (i < attempts);
+        throw new NoValidLocationException(map, enemy, $"Could not find valid spawn location after {attempts} attempts");
     }
 
-    // public override void Draw(GameTime gameTime)
-    // {
-    //     var spriteBatch = new SpriteBatch(Game.GraphicsDevice);
-    //     spriteBatch.Begin();
-    //
-    //     foreach (var enemy in Enemies)
-    //     {
-    //         var destinationRect =
-    //             new Rectangle(enemy.Location.X * 16, enemy.Location.Y * 16, 16, 16);
-    //         var spriteRect = new Rectangle(enemy.SpriteLocation.X * 16, enemy.SpriteLocation.Y * 16, 16,
-    //             16);
-    //         var spriteSheet = Game.Content.Load<Texture2D>(Player.SpriteSheet);
-    //         spriteBatch.Draw(spriteSheet, destinationRect, spriteRect, Color.Aqua);
-    //     }
-    //     
-    //     spriteBatch.End();
-    //     base.Draw(gameTime);
-    // }
+}
+
+public class PathfinderException : Exception
+{
+    public PathfinderException(string message) : base(message)
+    {
+    }
+}
+
+public class NoValidLocationException : Exception
+{
+    public TileMap Map;
+    public Entity Entity;
+    
+    public NoValidLocationException(TileMap map, Entity entity, string message) : base(message)
+    {
+        Map = map;
+        Entity = entity;
+        Console.WriteLine($"No valid location for entity {entity}");
+    }
 }

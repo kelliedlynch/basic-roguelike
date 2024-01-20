@@ -17,14 +17,11 @@ public class Player : Creature
     public Player()
     {
         SpriteLocation = new IntVector2(27, 0);
+        Color = Color.Aqua;
     }
 
-    // public void Draw(SpriteBatch spriteBatch)
-    // {
-    //     var destinationRect =
-    //         new Rectangle(Location.X * TileSize.X, Location.Y * TileSize.Y, TileSize.X, TileSize.Y);
-    //     var spriteRect = new Rectangle(SpriteLocation.X * TileSize.X, SpriteLocation.Y * TileSize.Y, TileSize.X,
-    //         TileSize.Y);
-    //     spriteBatch.Draw(SpriteSheet, destinationRect, spriteRect, Color.Aqua);
-    // }
+    public void AttackEntity(Entity entity)
+    {
+        entity.Destroy();
+    }
 }

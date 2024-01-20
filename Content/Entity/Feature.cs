@@ -1,4 +1,5 @@
 using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -20,6 +21,7 @@ public class StairsUp : Feature
         SpriteSheet = ("Graphics/monochrome-transparent_packed");
         SpriteLocation = new IntVector2(2, 6);
         Location = new IntVector2(x, y);
+        Color = Color.Chartreuse;
     }
 }
 
@@ -32,5 +34,6 @@ public class StairsDown : Feature
         SpriteSheet = ("Graphics/monochrome-transparent_packed");
         SpriteLocation = new IntVector2(3, 6);
         Location = new IntVector2(x, y);
+        Color = Color.Chartreuse;
     }
 }

@@ -168,7 +168,7 @@ public class MapGenerator
     {
         return false;
     }
-    var adj = map.GetAdjacentTiles(tile.Location);
+    var adj = map.GetAdjacentTiles(tile.Location, 2);
     return adj.TrueForAll(x => x.Type == TileType.Floor);
     }
 
@@ -217,14 +217,10 @@ public class MapGenerator
                 continue;
             }
             
-            var adj = map.GetAdjacentTiles(tile.Location);
-            var valid = adj.TrueForAll(x => x.Type == TileType.Floor);
-            if (valid)
-            {
-                map.StairsDown = new StairsDown(tile.Location.X, tile.Location.Y);
-                map.Features[tile.Location.X, tile.Location.Y].Add(map.StairsDown);
-                return;
-            }
+            map.StairsDown = new StairsDown(tile.Location.X, tile.Location.Y);
+            map.Features[tile.Location.X, tile.Location.Y].Add(map.StairsDown);
+            return;
+
         } while (attempts < 200);
         throw new ValidLocationNotFoundException("Could not place stairs down");
     }

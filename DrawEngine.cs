@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using JetBrains.Annotations;
@@ -12,29 +11,22 @@ namespace Roguelike;
 
 public class DrawEngine : DrawableGameComponent
 {
-
-    public TileMap TileMap;
-    public Player Player;
-    public EnemyManager EnemyManager;
     
     private readonly IntVector2 _tileSize = new(16, 16);
-    private readonly Random _random = new();
     private readonly Dictionary<TileType, TextureData> _textures = new();
     private readonly Dictionary<string, Texture2D> _spriteSheets = new();
-    private bool _keyIsPressed;
+    
 
 
     public DrawEngine(RoguelikeGame game) : base(game)
     {
-        game.BeginGame += LoadNewMap;
         // EnemyManager = new EnemyManager(game);
         
     }
 
     public override void Initialize()
     {
-        Player = Game.Services.GetService<PlayerManager>().Player;
-        EnemyManager = Game.Services.GetService<EnemyManager>();
+
         base.Initialize();
     }
 
@@ -44,12 +36,6 @@ public class DrawEngine : DrawableGameComponent
         base.LoadContent();
     }
 
-    public void LoadNewMap(object sender, EventArgs e)
-    {
-        var generator = new MapGenerator();
-        TileMap = generator.GenerateDungeonMap();
-    }
-    
     private void LoadTextures(string textureDefFile)
     {
         var rootPath = Path.GetFullPath(@"../../../");
@@ -79,78 +65,80 @@ public class DrawEngine : DrawableGameComponent
 
     }
 
-    public override void Update(GameTime gameTime)
-    {
-        var player = Game.Services.GetService<PlayerManager>().Player;
-        var keyboard = Keyboard.GetState();
-        if (!_keyIsPressed)
-        {
-            if (keyboard.GetPressedKeys().Length > 0)
-            {
-                _keyIsPressed = true;
-            }
-
-            var destination = player.Location;
-            if (keyboard.IsKeyDown(Keys.Up))
-            {
-                destination += Direction.Up;
-            }
-            else if (keyboard.IsKeyDown(Keys.Down))
-            {
-                destination += Direction.Down;
-            }
-            else if (keyboard.IsKeyDown(Keys.Left))
-            {
-                destination += Direction.Left;
-            }
-            else if (keyboard.IsKeyDown(Keys.Right))
-            {
-                destination += Direction.Right;
-            }
-
-            if (destination != player.Location)
-            {
-                var path = player.Pathfinder.FindPath(TileMap, player.Location, destination);
-                if (path is not null && path.Count > 0)
-                {
-                    player.Location = destination;
-                }
-            }
-        }
-        else
-        {
-            if (keyboard.GetPressedKeys().Length == 0)
-            {
-                _keyIsPressed = false;
-            }
-        }
-
-        
-    }
+    // public override void Update(GameTime gameTime)
+    // {
+    //     var player = Game.Services.GetService<PlayerManager>().Player;
+    //     var map = Game.Services.GetService<MapManager>().CurrentMap;
+    //     var keyboard = Keyboard.GetState();
+    //     if (!_keyIsPressed)
+    //     {
+    //         if (keyboard.GetPressedKeys().Length > 0)
+    //         {
+    //             _keyIsPressed = true;
+    //         }
+    //
+    //         var destination = player.Location;
+    //         if (keyboard.IsKeyDown(Keys.Up))
+    //         {
+    //             destination += Direction.Up;
+    //         }
+    //         else if (keyboard.IsKeyDown(Keys.Down))
+    //         {
+    //             destination += Direction.Down;
+    //         }
+    //         else if (keyboard.IsKeyDown(Keys.Left))
+    //         {
+    //             destination += Direction.Left;
+    //         }
+    //         else if (keyboard.IsKeyDown(Keys.Right))
+    //         {
+    //             destination += Direction.Right;
+    //         }
+    //
+    //         if (destination != player.Location)
+    //         {
+    //             var path = player.Pathfinder.FindPath(map, player.Location, destination);
+    //             if (path is not null && path.Count > 0)
+    //             {
+    //                 player.Location = destination;
+    //             }
+    //         }
+    //     }
+    //     else
+    //     {
+    //         if (keyboard.GetPressedKeys().Length == 0)
+    //         {
+    //             _keyIsPressed = false;
+    //         }
+    //     }
+    //
+    //     
+    // }
     
     
     public override void Draw(GameTime gameTime)
     {
+        var map = Game.Services.GetService<MapManager>().CurrentMap;
         var spriteBatch = new SpriteBatch(Game.GraphicsDevice);
         spriteBatch.Begin();
         // Draw Dungeon
-        for (var i = 0; i < TileMap.Tiles.GetLength(0); i++)
+        for (var i = 0; i < map.Tiles.GetLength(0); i++)
         {
-            for (var j = 0; j < TileMap.Tiles.GetLength(1); j++)
+            for (var j = 0; j < map.Tiles.GetLength(1); j++)
             {
                 var tileOrigin = new Vector2(i * _tileSize.X, j * _tileSize.Y);
-                var tile = TileMap.GetTileAt(new IntVector2(i, j));
+                var tile = map.GetTileAt(new IntVector2(i, j));
                 var tileData = _textures[tile.Type];
                 spriteBatch.Draw(tileData.SpriteSheetTexture, tileOrigin, tileData.TileRect, tileData.Color);
             }
         }
         
         // Draw Features
-        for (var i = 0; i < TileMap.Features.GetLength(0); i++)
+        for (var i = 0; i < map.Features.GetLength(0); i++)
         {
-            for (var j = 0; j < TileMap.Features.GetLength(1); j++)
+            for (var j = 0; j < map.Features.GetLength(1); j++)
             {
-                var features = TileMap.Features[i, j];
+                var features = map.Features[i, j];
                 foreach (var f in features)
                 {
                     var featureSpriteOrigin = new IntVector2(f.SpriteLocation.X * _tileSize.X, f.SpriteLocation.Y * _tileSize.Y);
@@ -158,7 +146,7 @@ public class DrawEngine : DrawableGameComponent
                     var featureDestinationRect = new Rectangle(f.Location.X * _tileSize.X, f.Location.Y * _tileSize.Y,
                         _tileSize.X, _tileSize.Y);
                     var featureTexture = Game.Content.Load<Texture2D>(f.SpriteSheet);
-                    spriteBatch.Draw(featureTexture, featureDestinationRect, featureSpriteRect, Color.Chartreuse);
+                    spriteBatch.Draw(featureTexture, featureDestinationRect, featureSpriteRect, f.Color);
                 }
 
             }
@@ -171,7 +159,7 @@ public class DrawEngine : DrawableGameComponent
         var spriteRect = new Rectangle(player.SpriteLocation.X * _tileSize.X, player.SpriteLocation.Y * _tileSize.Y, _tileSize.X,
             _tileSize.Y);
         var spriteSheet = Game.Content.Load<Texture2D>(player.SpriteSheet);
-        spriteBatch.Draw(spriteSheet, destinationRect, spriteRect, Color.Aqua);
+        spriteBatch.Draw(spriteSheet, destinationRect, spriteRect, player.Color);
         
         // Draw Enemies
         var eman = Game.Services.GetService<EnemyManager>();
@@ -182,7 +170,7 @@ public class DrawEngine : DrawableGameComponent
             var enemySpriteRect = new Rectangle(enemy.SpriteLocation.X * _tileSize.X, enemy.SpriteLocation.Y * _tileSize.Y, _tileSize.X,
                 _tileSize.Y);
             var enemySpriteSheet = Game.Content.Load<Texture2D>(enemy.SpriteSheet);
-            spriteBatch.Draw(enemySpriteSheet, enemyDestinationRect, enemySpriteRect, Color.IndianRed);
+            spriteBatch.Draw(enemySpriteSheet, enemyDestinationRect, enemySpriteRect, enemy.Color);
         }
         
         spriteBatch.End();
@@ -229,12 +217,4 @@ public class DrawEngine : DrawableGameComponent
             }
         }
     }
-}
-
-public struct Direction
-{
-    public static IntVector2 Up { get; } = new(0, -1);
-    public static IntVector2 Down { get; } = new(0, 1);
-    public static IntVector2 Left { get; } = new(-1, 0);
-    public static IntVector2 Right { get; } = new(1, 0);
 }

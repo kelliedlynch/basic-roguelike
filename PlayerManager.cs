@@ -5,28 +5,44 @@ namespace Roguelike;
 
 public class PlayerManager : GameComponent
 {
-    public Player Player;
+    public Player Player = new();
     
     public PlayerManager(RoguelikeGame game) : base(game)
     {
-        game.BeginGame += CreateNewPlayer;
     }
 
     public override void Initialize()
     {
+        Game.Services.GetService<MapManager>().NewLevelLoaded += SpawnInPlayer;
 
         base.Initialize();
     }
 
-    public void CreateNewPlayer(object sender, EventArgs e)
+    public void SpawnInPlayer(object sender, EventArgs e)
     {
-        var map = Game.Services.GetService<DrawEngine>().TileMap;
-        Player = new Player();
-        SpawnInPlayer(map);
+        var map = Game.Services.GetService<MapManager>().CurrentMap;
+        Player.Location = map.EntryPoint;
     }
 
-    public void SpawnInPlayer(TileMap map)
+    public void AttemptMove(IntVector2 loc)
     {
-        Player.Location = map.EntryPoint;
+        var map = Game.Services.GetService<MapManager>().CurrentMap;
+        var path = Player.Pathfinder.FindPath(map, Player.Location, loc);
+        if (path is null || path.Count == 0)
+        {
+            return;
+        }
+
+        var enemies = Game.Services.GetService<EnemyManager>().Enemies;
+        foreach (var enemy in enemies)
+        {
+            if (enemy.Location == loc)
+            {
+                Player.AttackEntity(enemy);
+                return;
+            } 
+        }
+
+        Player.Location = loc;
     }
 }
