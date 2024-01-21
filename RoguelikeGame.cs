@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Roguelike.Content.Entity.Creature;
+using Roguelike.Content.Entity;
+using Roguelike.Entity;
 
 namespace Roguelike;
 
@@ -15,6 +16,7 @@ public class RoguelikeGame : Game
     public PlayerManager PlayerManager;
     public MapManager MapManager;
     public InputManager InputManager;
+    public EntityManager EntityManager;
     public Player Player;
 
     public event EventHandler BeginGame;
@@ -54,6 +56,10 @@ public class RoguelikeGame : Game
         EnemyManager = new EnemyManager(this);
         Components.Add(EnemyManager);
         Services.AddService(typeof(EnemyManager), EnemyManager);
+        
+        EntityManager = new EntityManager(this);
+        Components.Add(EntityManager);
+        Services.AddService(typeof(EntityManager), EntityManager);
 
         InputManager = new InputManager(this);
         Components.Add(InputManager);

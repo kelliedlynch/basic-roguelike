@@ -7,7 +7,7 @@ namespace Roguelike.Content.Entity;
 
 // Class for things that can't be picked up, like stairs or decorative tiles
 
-public class Feature : Entity
+public class Feature : Roguelike.Entity.Entity
 {
     
 }

@@ -1,10 +1,12 @@
 using System;
 using System.Buffers.Text;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Roguelike.Entity;
 
-namespace Roguelike.Content.Entity.Creature;
+namespace Roguelike.Entity;
 
-public class Creature : Entity
+public class Creature : Roguelike.Entity.Entity
 {
     public Pathfinder Pathfinder = new ();
     public event EventHandler CreatureWasDestroyed;
@@ -16,6 +18,8 @@ public class Creature : Entity
 
     public override void Destroy()
     {
-        CreatureWasDestroyed?.Invoke(this, new DestroyEventArgs(this));
+        var coin = new Money(1);
+        var args = new DestroyEventArgs(this, new List<Entity>() { coin });
+        CreatureWasDestroyed?.Invoke(this, args);
     }
 }

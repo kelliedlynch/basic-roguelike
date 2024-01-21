@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
+using Roguelike.Entity;
 
 namespace Roguelike;
 
@@ -21,7 +22,10 @@ public class PlayerManager : GameComponent
     public void SpawnInPlayer(object sender, EventArgs e)
     {
         var map = Game.Services.GetService<MapManager>().CurrentMap;
-        Player.Location = map.EntryPoint;
+        Player = new Player
+        {
+            Location = map.EntryPoint
+        };
     }
 
     public void AttemptMove(IntVector2 loc)
@@ -32,15 +36,26 @@ public class PlayerManager : GameComponent
         {
             return;
         }
+        
+        var entities = Game.Services.GetService<EntityManager>().Entities;
+        for (var index = entities.Count - 1; index >= 0; index--)
+        {
+            var entity = entities[index];
+            if (entity.Location == loc)
+            {
+                Player.PickUp(entity);
+            }
+        }
 
         var enemies = Game.Services.GetService<EnemyManager>().Enemies;
-        foreach (var enemy in enemies)
+        for (var index = enemies.Count - 1; index >= 0; index--)
         {
+            var enemy = enemies[index];
             if (enemy.Location == loc)
             {
                 Player.AttackEntity(enemy);
                 return;
-            } 
+            }
         }
 
         Player.Location = loc;

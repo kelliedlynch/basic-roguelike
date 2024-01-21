@@ -80,4 +80,27 @@ public struct IntVector2 : IEquatable<IntVector2>
     {
         return new IntVector2(l.X / r.X, l.Y / r.Y);
     }
+
+    public static implicit operator Point(IntVector2 v)
+    {
+        return new Point(v.X, v.Y);
+    }
+
+    public static implicit operator Vector2(IntVector2 v)
+    {
+        return new Vector2(v.X, v.Y);
+    }
+}
+
+public static class IntVector2Extension
+{
+    public static IntVector2 ToIntVector2(this Vector2 v)
+    {
+        return new IntVector2((int)v.X, (int)v.Y);
+    }
+    
+    public static IntVector2 ToIntVector2(this Point p)
+    {
+        return new IntVector2(p.X, p.Y);
+    }
 }

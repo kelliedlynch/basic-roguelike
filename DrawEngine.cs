@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using JetBrains.Annotations;
 using Microsoft.Xna.Framework.Input;
+using Roguelike.Entity;
 
 namespace Roguelike;
 
@@ -13,6 +14,9 @@ public class DrawEngine : DrawableGameComponent
 {
     
     private readonly IntVector2 _tileSize = new(16, 16);
+    private readonly Rectangle _topBar;
+    private const int TopBarHeight = 30;
+    private readonly Rectangle _mapWindow;
     private readonly Dictionary<TileType, TextureData> _textures = new();
     private readonly Dictionary<string, Texture2D> _spriteSheets = new();
     
@@ -21,7 +25,9 @@ public class DrawEngine : DrawableGameComponent
     public DrawEngine(RoguelikeGame game) : base(game)
     {
         // EnemyManager = new EnemyManager(game);
-        
+        _topBar = new Rectangle(Point.Zero, new Point(Game.GraphicsDevice.Viewport.Width, TopBarHeight));
+        _mapWindow = new Rectangle(new Point(0, TopBarHeight),
+            new Point(Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height));
     }
 
     public override void Initialize()
@@ -32,108 +38,75 @@ public class DrawEngine : DrawableGameComponent
 
     protected override void LoadContent()
     {
-        LoadTextures("TileTextures");
+        // LoadTextures("TileTextures");
         base.LoadContent();
     }
 
-    private void LoadTextures(string textureDefFile)
+    // private void LoadTextures(string textureDefFile)
+    // {
+    //     var rootPath = Path.GetFullPath(@"../../../");
+    //     var rawTexData = File.ReadAllText($"{rootPath}/{textureDefFile}.json");
+    //     var texData = JsonConvert.DeserializeObject<List<TextureData>>(rawTexData);
+    //
+    //     if (texData is null)
+    //     {
+    //         Console.WriteLine($"Unable to deserialize texture file {textureDefFile}");
+    //         return;
+    //     }
+    //
+    //     foreach (var tex in texData)
+    //     {
+    //         if (!_spriteSheets.ContainsKey(tex.SpriteSheet))
+    //         {
+    //             var newSheet = Game.Content.Load<Texture2D>($"Graphics/{tex.SpriteSheet}");
+    //             _spriteSheets[tex.SpriteSheet] = newSheet;
+    //         }
+    //
+    //         tex.SpriteSheetTexture = _spriteSheets[tex.SpriteSheet];
+    //         var tileRect = new Rectangle(tex.TextureLocationX * _tileSize.X, tex.TextureLocationY * _tileSize.Y,
+    //             _tileSize.X, _tileSize.Y);
+    //         tex.TileRect = tileRect;
+    //         _textures[tex.TileType] = tex;
+    //     }
+    //
+    // }
+
+    private void DrawSpriteAtLocation(SpriteRepresented sprite, IntVector2 loc, SpriteBatch spriteBatch)
     {
-        var rootPath = Path.GetFullPath(@"../../../");
-        var rawTexData = File.ReadAllText($"{rootPath}/{textureDefFile}.json");
-        var texData = JsonConvert.DeserializeObject<List<TextureData>>(rawTexData);
-
-        if (texData is null)
-        {
-            Console.WriteLine($"Unable to deserialize texture file {textureDefFile}");
-            return;
-        }
-
-        foreach (var tex in texData)
-        {
-            if (!_spriteSheets.ContainsKey(tex.SpriteSheet))
-            {
-                var newSheet = Game.Content.Load<Texture2D>($"Graphics/{tex.SpriteSheet}");
-                _spriteSheets[tex.SpriteSheet] = newSheet;
-            }
-
-            tex.SpriteSheetTexture = _spriteSheets[tex.SpriteSheet];
-            var tileRect = new Rectangle(tex.TextureLocationX * _tileSize.X, tex.TextureLocationY * _tileSize.Y,
-                _tileSize.X, _tileSize.Y);
-            tex.TileRect = tileRect;
-            _textures[tex.TileType] = tex;
-        }
-
+        DrawSpriteAtLocation(sprite, loc, spriteBatch, sprite.Color);
+    }
+    
+    private void DrawSpriteAtLocation(SpriteRepresented sprite, IntVector2 loc, SpriteBatch spriteBatch, Color color)
+    {
+        var origin = LocationToScreenCoords(loc);
+        DrawSpriteAtCoords(sprite, origin, spriteBatch, color);
+    }
+    
+    private void DrawSpriteAtCoords(SpriteRepresented sprite, Point coords, SpriteBatch spriteBatch, Color color)
+    {
+        var destinationRect = new Rectangle(coords, _tileSize);
+        var tex = Game.Content.Load<Texture2D>(sprite.SpriteSheet);
+        spriteBatch.Draw(tex, destinationRect, sprite.Rectangle, color);
     }
 
-    // public override void Update(GameTime gameTime)
-    // {
-    //     var player = Game.Services.GetService<PlayerManager>().Player;
-    //     var map = Game.Services.GetService<MapManager>().CurrentMap;
-    //     var keyboard = Keyboard.GetState();
-    //     if (!_keyIsPressed)
-    //     {
-    //         if (keyboard.GetPressedKeys().Length > 0)
-    //         {
-    //             _keyIsPressed = true;
-    //         }
-    //
-    //         var destination = player.Location;
-    //         if (keyboard.IsKeyDown(Keys.Up))
-    //         {
-    //             destination += Direction.Up;
-    //         }
-    //         else if (keyboard.IsKeyDown(Keys.Down))
-    //         {
-    //             destination += Direction.Down;
-    //         }
-    //         else if (keyboard.IsKeyDown(Keys.Left))
-    //         {
-    //             destination += Direction.Left;
-    //         }
-    //         else if (keyboard.IsKeyDown(Keys.Right))
-    //         {
-    //             destination += Direction.Right;
-    //         }
-    //
-    //         if (destination != player.Location)
-    //         {
-    //             var path = player.Pathfinder.FindPath(map, player.Location, destination);
-    //             if (path is not null && path.Count > 0)
-    //             {
-    //                 player.Location = destination;
-    //             }
-    //         }
-    //     }
-    //     else
-    //     {
-    //         if (keyboard.GetPressedKeys().Length == 0)
-    //         {
-    //             _keyIsPressed = false;
-    //         }
-    //     }
-    //
-    //     
-    // }
-    
-    
-    public override void Draw(GameTime gameTime)
+    private Point LocationToScreenCoords(IntVector2 loc)
     {
-        var map = Game.Services.GetService<MapManager>().CurrentMap;
-        var spriteBatch = new SpriteBatch(Game.GraphicsDevice);
-        spriteBatch.Begin();
-        // Draw Dungeon
+        return new Point(loc.X * _tileSize.X, loc.Y * _tileSize.Y + TopBarHeight);
+    }
+    
+    private void DrawDungeon(TileMap map, SpriteBatch spriteBatch)
+    {
         for (var i = 0; i < map.Tiles.GetLength(0); i++)
         {
             for (var j = 0; j < map.Tiles.GetLength(1); j++)
             {
-                var tileOrigin = new Vector2(i * _tileSize.X, j * _tileSize.Y);
-                var tile = map.GetTileAt(new IntVector2(i, j));
-                var tileData = _textures[tile.Type];
-                spriteBatch.Draw(tileData.SpriteSheetTexture, tileOrigin, tileData.TileRect, tileData.Color);
+                DrawSpriteAtLocation(map.Tiles[i, j], new IntVector2(i, j), spriteBatch);
             }
         }
-        
-        // Draw Features
+    }
+
+    private void DrawFeatures(TileMap map, SpriteBatch spriteBatch)
+    {
         for (var i = 0; i < map.Features.GetLength(0); i++)
         {
             for (var j = 0; j < map.Features.GetLength(1); j++)
@@ -141,37 +114,50 @@ public class DrawEngine : DrawableGameComponent
                 var features = map.Features[i, j];
                 foreach (var f in features)
                 {
-                    var featureSpriteOrigin = new IntVector2(f.SpriteLocation.X * _tileSize.X, f.SpriteLocation.Y * _tileSize.Y);
-                    var featureSpriteRect = new Rectangle(featureSpriteOrigin.X, featureSpriteOrigin.Y, _tileSize.X, _tileSize.Y);
-                    var featureDestinationRect = new Rectangle(f.Location.X * _tileSize.X, f.Location.Y * _tileSize.Y,
-                        _tileSize.X, _tileSize.Y);
-                    var featureTexture = Game.Content.Load<Texture2D>(f.SpriteSheet);
-                    spriteBatch.Draw(featureTexture, featureDestinationRect, featureSpriteRect, f.Color);
+                    DrawSpriteAtLocation(f, new IntVector2(i, j), spriteBatch);
                 }
-
             }
+        }
+    }
+
+    public void DrawOverlay(SpriteBatch spriteBatch, Player player)
+    {
+        var tex = Game.Content.Load<Texture2D>("Graphics/monochrome-transparent_packed");
+        var loc = new IntVector2(35, 16);
+        spriteBatch.Draw(tex, new Vector2(6, 6), new Rectangle(loc * _tileSize, _tileSize), Color.Gold);
+        var font = Game.Content.Load<SpriteFont>("Fonts/Kenney Mini");
+        spriteBatch.DrawString(font, $"{player.Money}", new Vector2(24, 4), Color.Gold);
+    }
+    
+    
+    public override void Draw(GameTime gameTime)
+    {
+        var map = Game.Services.GetService<MapManager>().CurrentMap;
+        var spriteBatch = new SpriteBatch(Game.GraphicsDevice);
+        spriteBatch.Begin();
+        
+        DrawDungeon(map, spriteBatch);
+
+        DrawFeatures(map, spriteBatch);
+
+        var ent = Game.Services.GetService<EntityManager>().Entities;
+        foreach (var entity in ent)
+        {
+            DrawSpriteAtLocation(entity, entity.Location, spriteBatch);
         }
         
         // Draw Player
         var player = Game.Services.GetService<PlayerManager>().Player;
-        var destinationRect =
-            new Rectangle(player.Location.X * _tileSize.X, player.Location.Y * _tileSize.Y, _tileSize.X, _tileSize.Y);
-        var spriteRect = new Rectangle(player.SpriteLocation.X * _tileSize.X, player.SpriteLocation.Y * _tileSize.Y, _tileSize.X,
-            _tileSize.Y);
-        var spriteSheet = Game.Content.Load<Texture2D>(player.SpriteSheet);
-        spriteBatch.Draw(spriteSheet, destinationRect, spriteRect, player.Color);
+        DrawSpriteAtLocation(player, player.Location, spriteBatch);
         
         // Draw Enemies
         var eman = Game.Services.GetService<EnemyManager>();
         foreach (var enemy in eman.Enemies)
         {
-            var enemyDestinationRect =
-                new Rectangle(enemy.Location.X * _tileSize.X, enemy.Location.Y * _tileSize.Y, _tileSize.X, _tileSize.Y);
-            var enemySpriteRect = new Rectangle(enemy.SpriteLocation.X * _tileSize.X, enemy.SpriteLocation.Y * _tileSize.Y, _tileSize.X,
-                _tileSize.Y);
-            var enemySpriteSheet = Game.Content.Load<Texture2D>(enemy.SpriteSheet);
-            spriteBatch.Draw(enemySpriteSheet, enemyDestinationRect, enemySpriteRect, enemy.Color);
+            DrawSpriteAtLocation(enemy, enemy.Location, spriteBatch);
         }
+
+        DrawOverlay(spriteBatch, player);
         
         spriteBatch.End();
     }
@@ -217,4 +203,5 @@ public class DrawEngine : DrawableGameComponent
             }
         }
     }
+
 }

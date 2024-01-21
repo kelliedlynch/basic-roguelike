@@ -3,6 +3,7 @@
 
 /outputDir:bin/$(Platform)
 /intermediateDir:obj/$(Platform)
+/platform:Windows
 /config:
 /profile:Reach
 /compress:False
@@ -11,18 +12,6 @@
 
 
 #---------------------------------- Content ---------------------------------#
-
-#begin Graphics/roguelikeDungeon_transparent.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/roguelikeDungeon_transparent.png
 
 #begin Graphics/monochrome-transparent_packed.png
 /importer:TextureImporter
@@ -36,6 +25,18 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/monochrome-transparent_packed.png
 
+#begin Graphics/roguelikeDungeon_transparent.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Graphics/roguelikeDungeon_transparent.png
+
 #begin Graphics/UIpackSheet_transparent.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -47,3 +48,15 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Graphics/UIpackSheet_transparent.png
+
+#begin Fonts/Kenney Mini.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Fonts/Kenney Mini.spritefont

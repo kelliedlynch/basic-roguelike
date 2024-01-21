@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Reflection.Metadata.Ecma335;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Roguelike.Content.Entity;
-using Roguelike.Content.Entity.Creature;
+using Roguelike.Entity;
 
 namespace Roguelike;
 
@@ -81,7 +80,13 @@ public class EnemyManager : DrawableGameComponent
     private void RemoveEnemyFromWorld(object sender, EventArgs args)
     {
         var enemy = (Creature)sender;
+        var a = (DestroyEventArgs)args;
         Enemies.Remove(enemy);
+        foreach (var item in a.ItemsDropped)
+        {
+            item.Location = enemy.Location;
+            Game.Services.GetService<EntityManager>().AddEntityToWorld(item);
+        }
     }
 
     private bool EnemyCapReached()
@@ -130,9 +135,9 @@ public class PathfinderException : Exception
 public class NoValidLocationException : Exception
 {
     public TileMap Map;
-    public Entity Entity;
+    public Entity.Entity Entity;
     
-    public NoValidLocationException(TileMap map, Entity entity, string message) : base(message)
+    public NoValidLocationException(TileMap map, Entity.Entity entity, string message) : base(message)
     {
         Map = map;
         Entity = entity;

@@ -1,16 +1,14 @@
-using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using Roguelike.Content.Entity;
 
 namespace Roguelike;
 
 public class InputManager : GameComponent
 {
     private bool _keyIsPressed;
-    private double _keyDownTime = 0;
+    private double _keyDownTime;
     private const double FastMoveDelay = .4;
-    private double _fastMoveTimer = 0;
+    private double _fastMoveTimer;
     private const double FastMoveInterval = .15;
 
     public InputManager(RoguelikeGame game) : base(game)
