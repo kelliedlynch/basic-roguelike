@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Roguelike.Entity;
+using Roguelike.Map;
 
 namespace Roguelike;
 
@@ -14,23 +15,21 @@ public class PlayerManager : GameComponent
 
     public override void Initialize()
     {
-        Game.Services.GetService<MapManager>().NewLevelLoaded += SpawnInPlayer;
+        // Game.Services.GetService<MapManager>().NewLevelLoaded += SpawnInPlayer;
 
         base.Initialize();
     }
 
-    public void SpawnInPlayer(object sender, EventArgs e)
-    {
-        var map = Game.Services.GetService<MapManager>().CurrentMap;
-        Player = new Player
-        {
-            Location = map.EntryPoint
-        };
-    }
+    // public void SpawnInPlayer(object sender, EventArgs e)
+    // {
+    //     var map = Game.Services.GetService<MapManager>().CurrentMap;
+    //     Player.Location = map.EntryPoint;
+    // }
 
     public void AttemptMove(IntVector2 loc)
     {
-        var map = Game.Services.GetService<MapManager>().CurrentMap;
+        var man = Game.Services.GetService<MapManager>();
+        var map = man.CurrentMap;
         var path = Player.Pathfinder.FindPath(map, Player.Location, loc);
         if (path is null || path.Count == 0)
         {
@@ -47,7 +46,7 @@ public class PlayerManager : GameComponent
             }
         }
 
-        var enemies = Game.Services.GetService<EnemyManager>().Enemies;
+        var enemies = Game.Services.GetService<EnemyManager>().Enemies[man.CurrentDungeonLevel - 1];
         for (var index = enemies.Count - 1; index >= 0; index--)
         {
             var enemy = enemies[index];

@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
-using Roguelike.Content.Entity;
+using Roguelike.Entity;
+using Roguelike.Entity.Feature;
 
 namespace Roguelike;
 
@@ -12,7 +14,9 @@ public class TileMap
     public readonly List<Feature>[,] Features;
     public StairsDown StairsDown;
     public StairsUp StairsUp;
-    public IntVector2 EntryPoint;
+    // public IntVector2 EntryPoint;
+
+    private readonly Random _random = new();
     
     public TileMap(int width, int height)
     {
@@ -90,6 +94,14 @@ public class TileMap
 
 
         return temp;    }
+
+    public DungeonTile RandomAdjacentTile(IntVector2 pos, int adjacencyType = 0)
+    {
+        var index = _random.Next(7);
+        var tiles = GetAdjacentTiles(pos, adjacencyType);
+        // TODO: FIND WHY THIS WAS INVALID INDEX ONCE
+        return tiles[index];
+    }
 
     public DungeonTile GetTileAt(IntVector2 pos)
     {

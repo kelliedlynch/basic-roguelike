@@ -4,12 +4,13 @@ using System.Reflection.Metadata.Ecma335;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Roguelike.Entity;
+using Roguelike.Map;
 
 namespace Roguelike;
 
 public class EnemyManager : DrawableGameComponent
 {
-    public List<Creature> Enemies = new();
+    public List<List<Creature>> Enemies = new();
     private Random _random = new();
 
     public EnemyManager(RoguelikeGame game) : base(game)
@@ -25,7 +26,8 @@ public class EnemyManager : DrawableGameComponent
 
     public void BeginGame(object sender, EventArgs e)
     {
-        Enemies = new List<Creature>();
+        Enemies = new List<List<Creature>>();
+        Enemies.Add(new List<Creature>());
         PlaceEnemies();
     }
 
@@ -36,13 +38,14 @@ public class EnemyManager : DrawableGameComponent
     
     public void PlaceEnemies()
     {
+        var dungeonLevel = Game.Services.GetService<MapManager>().CurrentDungeonLevel;
         do
         {
-            SpawnNewEnemy();
-        } while (!EnemyCapReached());
+            SpawnNewEnemy(dungeonLevel);
+        } while (!EnemyCapReached(dungeonLevel));
     }
     
-    private void SpawnNewEnemy()
+    private void SpawnNewEnemy(int dungeonLevel)
     {
         var map = Game.Services.GetService<MapManager>().CurrentMap;
         var enemy = new Creature();
@@ -66,6 +69,7 @@ public class EnemyManager : DrawableGameComponent
         {
             if (shouldAddEnemy)
             {
+                enemy.DungeonLevel = dungeonLevel;
                 AddEnemyToWorld(enemy);
             }
         }
@@ -73,7 +77,7 @@ public class EnemyManager : DrawableGameComponent
 
     private void AddEnemyToWorld(Creature enemy)
     {
-        Enemies.Add(enemy);
+        Enemies[enemy.DungeonLevel - 1].Add(enemy);
         enemy.CreatureWasDestroyed += RemoveEnemyFromWorld;
     }
 
@@ -81,7 +85,7 @@ public class EnemyManager : DrawableGameComponent
     {
         var enemy = (Creature)sender;
         var a = (DestroyEventArgs)args;
-        Enemies.Remove(enemy);
+        Enemies[enemy.DungeonLevel - 1].Remove(enemy);
         foreach (var item in a.ItemsDropped)
         {
             item.Location = enemy.Location;
@@ -89,9 +93,9 @@ public class EnemyManager : DrawableGameComponent
         }
     }
 
-    private bool EnemyCapReached()
+    private bool EnemyCapReached(int dungeonLevel)
     {
-        return Enemies.Count > 10;
+        return Enemies[dungeonLevel - 1].Count > 10;
     }
 
     private IntVector2 FindValidSpawnLocation(TileMap map, Creature enemy)

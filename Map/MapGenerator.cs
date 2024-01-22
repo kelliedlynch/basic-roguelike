@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using Roguelike.Content.Entity;
+using Roguelike.Entity.Feature;
 
 namespace Roguelike;
 
@@ -9,7 +9,7 @@ public class MapGenerator
 {
     private readonly Random _random = new();
     private readonly IntVector2 _mapSize = new IntVector2(50, 68);
-    private readonly IntVector2 _maxRoomRegionSize = new(12, 16);
+    private readonly IntVector2 _maxRoomRegionSize = new(14, 18);
     private readonly IntVector2 _minRoomSize = new(3, 3);
     
     // Creates a dungeon-style map, with rectangular rooms and narrow passages connecting them
@@ -145,7 +145,7 @@ public class MapGenerator
         PlaceStairsUp(map);
         PlaceStairsDown(map);
 
-        SetDefaultEntryPoint(map);
+        // SetDefaultEntryPoint(map);
 
         return map;
     }
@@ -239,12 +239,10 @@ public class MapGenerator
         }
     }
     
-    public void SetDefaultEntryPoint(TileMap map)
-    {
-        var t = _random.Next(0, 7);
-        var adj = map.GetAdjacentTiles(new IntVector2(map.StairsUp.Location.X, map.StairsUp.Location.Y), 2);
-        map.EntryPoint = adj[t].Location;
-    }
+    // public void SetDefaultEntryPoint(TileMap map)
+    // {
+    //     map.EntryPoint = map.RandomAdjacentTile(map.StairsUp.Location).Location;
+    // }
     
 }
 

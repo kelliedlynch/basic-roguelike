@@ -48,6 +48,7 @@ public struct IntVector2 : IEquatable<IntVector2>
     {
         var diffX = Math.Abs(obj.X - X);
         var diffY = Math.Abs(obj.Y - Y);
+        // NOTE: Adjust this value if you want to change the precision of equality checks.
         return diffX < .00001f && diffY < .00001f;
     }
 

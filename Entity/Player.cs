@@ -7,9 +7,6 @@ public class Player : Creature
 {
     public int Money = 0;
 
-
-
-    
     public Player()
     {
         SpriteLocation = new IntVector2(27, 0);

@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using JetBrains.Annotations;
 using Microsoft.Xna.Framework.Input;
 using Roguelike.Entity;
+using Roguelike.Map;
 
 namespace Roguelike;
 
@@ -132,7 +133,8 @@ public class DrawEngine : DrawableGameComponent
     
     public override void Draw(GameTime gameTime)
     {
-        var map = Game.Services.GetService<MapManager>().CurrentMap;
+        var man = Game.Services.GetService<MapManager>();
+        var map = man.CurrentMap;
         var spriteBatch = new SpriteBatch(Game.GraphicsDevice);
         spriteBatch.Begin();
         
@@ -152,7 +154,7 @@ public class DrawEngine : DrawableGameComponent
         
         // Draw Enemies
         var eman = Game.Services.GetService<EnemyManager>();
-        foreach (var enemy in eman.Enemies)
+        foreach (var enemy in eman.Enemies[man.CurrentDungeonLevel - 1])
         {
             DrawSpriteAtLocation(enemy, enemy.Location, spriteBatch);
         }

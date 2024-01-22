@@ -28,7 +28,6 @@
   <ItemGroup>
     <Folder Include="Content\bin" />
     <Folder Include="Content\obj" />
-    <Folder Include="Entity\Creature" />
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
     <Message Text="Restoring dotnet tools" Importance="High" />

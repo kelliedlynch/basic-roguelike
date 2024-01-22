@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Roguelike.Content.Entity;
 using Roguelike.Entity;
+using Roguelike.Map;
 
 namespace Roguelike;
 
