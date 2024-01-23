@@ -5,20 +5,36 @@ namespace Roguelike.Entity;
 
 public class Entity : SpriteRepresented
 {
-    public IntVector2 Location
+    // public IntVector2 MapLocation
+    // {
+    //     get => new (_location.X, _location.Y);
+    //     set
+    //     {
+    //         if (value == MapLocation) return;
+    //         var args = new MoveEventArgs(this, new IntVector2(MapLocation.X, MapLocation.Y), value);
+    //         _location = new IntVector3(value.X, value.Y, _location.Z);
+    //         EntityMoved?.Invoke(this, args);
+    //     }
+    // }
+
+    public IntVector3 Location
     {
         get => _location;
         set
         {
-            if (value == _location) return;
-            var args = new MoveEventArgs(this, new IntVector2(Location.X, Location.Y), value);
+            if (value == Location) return;
+            var args = new MoveEventArgs(this, Location, value);
             _location = value;
             EntityMoved?.Invoke(this, args);
         }
     }
 
-    private IntVector2 _location;
-    public int DungeonLevel;
+    private IntVector3 _location;
+
+    // public int DungeonLevel
+    // {
+    //     get => _location.Z;
+    // }
 
     public event EventHandler EntityWasCreated;
     public event EventHandler EntityWasDestroyed;
@@ -52,8 +68,8 @@ public class DestroyEventArgs : EventArgs
 public class MoveEventArgs : EventArgs
 {
     public Entity Entity;
-    public IntVector2 FromLocation;
-    public IntVector2 ToLocation;
+    public IntVector3 FromLocation;
+    public IntVector3 ToLocation;
 
     public MoveEventArgs(Entity e)
     {
@@ -61,6 +77,18 @@ public class MoveEventArgs : EventArgs
     }
     
     public MoveEventArgs(Entity e, IntVector2 from, IntVector2 to)
+    {
+        var from3d = new IntVector3(from.X, from.Y, e.Location.Z);
+        var to3d = new IntVector3(to.X, to.Y, e.Location.Z);
+        SetVars(e, from3d, to3d);
+    }
+    
+    public MoveEventArgs(Entity e, IntVector3 from, IntVector3 to)
+    {
+        SetVars(e, from, to);
+    }
+
+    private void SetVars(Entity e, IntVector3 from, IntVector3 to)
     {
         Entity = e;
         FromLocation = from;

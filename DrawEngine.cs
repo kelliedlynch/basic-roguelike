@@ -145,18 +145,18 @@ public class DrawEngine : DrawableGameComponent
         var ent = Game.Services.GetService<EntityManager>().Entities;
         foreach (var entity in ent)
         {
-            DrawSpriteAtLocation(entity, entity.Location, spriteBatch);
+            DrawSpriteAtLocation(entity, entity.Location.To2D, spriteBatch);
         }
         
         // Draw Player
         var player = Game.Services.GetService<PlayerManager>().Player;
-        DrawSpriteAtLocation(player, player.Location, spriteBatch);
+        DrawSpriteAtLocation(player, player.Location.To2D, spriteBatch);
         
         // Draw Enemies
         var eman = Game.Services.GetService<EnemyManager>();
-        foreach (var enemy in eman.Enemies[man.CurrentDungeonLevel - 1])
+        foreach (var enemy in eman.EnemiesOnLevel(man.CurrentDungeonLevel))
         {
-            DrawSpriteAtLocation(enemy, enemy.Location, spriteBatch);
+            DrawSpriteAtLocation(enemy, enemy.Location.To2D, spriteBatch);
         }
 
         DrawOverlay(spriteBatch, player);

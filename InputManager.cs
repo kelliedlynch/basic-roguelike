@@ -37,7 +37,7 @@ public class InputManager : GameComponent
             }
 
 
-            var destination = manager.Player.Location;
+            var destination = manager.Player.Location.To2D;
             if (keyboard.IsKeyDown(Keys.Up))
             {
                 destination += Direction.Up;
@@ -57,7 +57,7 @@ public class InputManager : GameComponent
 
 
             
-            manager.AttemptMove(destination);
+            manager.AttemptMove(new IntVector3(destination, manager.Player.Location.Z));
         }
         else if (_keyIsPressed && keyboard.GetPressedKeys().Length > 0)
         {

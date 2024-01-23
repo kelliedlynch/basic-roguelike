@@ -1,15 +1,14 @@
-using System.Runtime.Intrinsics.X86;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
-namespace Roguelike;
+namespace Roguelike.Map;
 
 public class DungeonTile : SpriteRepresented
 {
     public int X;
     public int Y;
+    public int Z;
 
-    public IntVector2 Location => new (X, Y);
+    public IntVector3 Location => new (X, Y, Z);
 
     private TileType _type = TileType.Void;
     public TileType Type

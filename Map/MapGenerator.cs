@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Roguelike.Entity.Feature;
+using Roguelike.Map;
 
 namespace Roguelike;
 
@@ -13,7 +14,7 @@ public class MapGenerator
     private readonly IntVector2 _minRoomSize = new(3, 3);
     
     // Creates a dungeon-style map, with rectangular rooms and narrow passages connecting them
-    public TileMap GenerateDungeonMap()
+    public TileMap GenerateDungeonMap(int dungeonLevel)
     {
         var map = new TileMap(_mapSize.X, _mapSize.Y);
         
@@ -142,8 +143,8 @@ public class MapGenerator
         PutUpWalls(map);
         
         // Place stairs
-        PlaceStairsUp(map);
-        PlaceStairsDown(map);
+        PlaceStairsUp(map, dungeonLevel);
+        PlaceStairsDown(map, dungeonLevel);
 
         // SetDefaultEntryPoint(map);
 
@@ -152,7 +153,7 @@ public class MapGenerator
 
     private bool IsValidStairsLocation(TileMap map, DungeonTile tile)
     {
-        return IsValidStairsLocation(map, tile.Location);
+        return IsValidStairsLocation(map, tile.Location.To2D);
     }
     
     private bool IsValidStairsLocation(TileMap map, IntVector2 location)
@@ -168,11 +169,11 @@ public class MapGenerator
     {
         return false;
     }
-    var adj = map.GetAdjacentTiles(tile.Location, 2);
+    var adj = map.GetAdjacentTiles(tile.Location.To2D, 2);
     return adj.TrueForAll(x => x.Type == TileType.Floor);
     }
 
-    private void PlaceStairsUp(TileMap map)
+    private void PlaceStairsUp(TileMap map, int dungeonLevel)
     {
         var attempts = 0;
         do
@@ -186,7 +187,7 @@ public class MapGenerator
                     continue;
                 }
 
-                map.StairsUp = new StairsUp(tile.X, tile.Y);
+                map.StairsUp = new StairsUp(tile.X, tile.Y, dungeonLevel);
                 map.Features[tile.X, tile.Y].Add(map.StairsUp);
                 return;
         } while (attempts < 200);
@@ -194,7 +195,7 @@ public class MapGenerator
         throw new ValidLocationNotFoundException("Could not place stairs up");
     }
     
-    private void PlaceStairsDown(TileMap map)
+    private void PlaceStairsDown(TileMap map, int dungeonLevel)
     {
         var attempts = 0;
         do
@@ -208,7 +209,7 @@ public class MapGenerator
                 continue;
             }
             var pf = new Pathfinder();
-            var distance = pf.FindPath(map, tile.Location, map.StairsUp.Location);
+            var distance = pf.FindPath(map, tile.Location.To2D, map.StairsUp.Location.To2D);
             if (distance is null) continue;
             var allowableDistance = (int)(map.Width * .4) + (int)(map.Height * .4);
             if (distance.Count < allowableDistance)
@@ -217,7 +218,7 @@ public class MapGenerator
                 continue;
             }
             
-            map.StairsDown = new StairsDown(tile.Location.X, tile.Location.Y);
+            map.StairsDown = new StairsDown(tile.Location);
             map.Features[tile.Location.X, tile.Location.Y].Add(map.StairsDown);
             return;
 

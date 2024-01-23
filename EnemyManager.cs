@@ -8,41 +8,67 @@ using Roguelike.Map;
 
 namespace Roguelike;
 
-public class EnemyManager : DrawableGameComponent
+public class EnemyManager : RoguelikeGameManager
 {
     public List<List<Creature>> Enemies = new();
     private Random _random = new();
 
     public EnemyManager(RoguelikeGame game) : base(game)
     {
-        game.BeginGame += BeginGame;
     }
 
-    public override void Initialize()
+    public List<Creature> EnemiesOnLevel(int level)
     {
+        var l = new List<Creature>();
+        if (Enemies.Count >= level)
+        {
+            l.AddRange(Enemies[level - 1]);
+        }
 
-        base.Initialize();
+        return l;
     }
 
-    public void BeginGame(object sender, EventArgs e)
+    protected override void OnConnectManagers(object sender, EventArgs e)
     {
+        // This event happens when all the manager classes are loaded. This is where we
+        // subscribe to events from other managers.
+        Game.Services.GetService<MapManager>().DungeonLevelAdded += OnDungeonLevelAdded;
+        Game.Services.GetService<PlayerManager>().AdvanceTurn += OnAdvanceTurn;
+        base.OnConnectManagers(sender, e);
+    }
+    
+    protected override void OnBeginGame(object sender, EventArgs e)
+    {
+        // This event happens upon beginning a new game. Managers are loaded/triggered in this order:
+        // Player -> Map -> Enemy -> Entity -> Input
         Enemies = new List<List<Creature>>();
+        RunSpawnCycle();
+        base.OnBeginGame(sender, e);
+    }
+
+    public void OnDungeonLevelAdded(object sender, EventArgs e)
+    {
         Enemies.Add(new List<Creature>());
-        PlaceEnemies();
+    }
+
+    public void OnAdvanceTurn(object sender, EventArgs e)
+    {
+        RunSpawnCycle();
     }
 
     private void RunSpawnCycle()
     {
-        
+        PlaceEnemies();
     }
     
     public void PlaceEnemies()
     {
+        var mapman = Game.Services.GetService<MapManager>();
         var dungeonLevel = Game.Services.GetService<MapManager>().CurrentDungeonLevel;
-        do
+        while (!EnemyCapReached(dungeonLevel))
         {
             SpawnNewEnemy(dungeonLevel);
-        } while (!EnemyCapReached(dungeonLevel));
+        } 
     }
     
     private void SpawnNewEnemy(int dungeonLevel)
@@ -53,7 +79,7 @@ public class EnemyManager : DrawableGameComponent
         try
         {
             var loc = FindValidSpawnLocation(map, enemy);
-            enemy.Location = loc;
+            enemy.Location = new IntVector3(loc.X, loc.Y, dungeonLevel);
         }
         catch (PathfinderException e)
         {
@@ -69,15 +95,21 @@ public class EnemyManager : DrawableGameComponent
         {
             if (shouldAddEnemy)
             {
-                enemy.DungeonLevel = dungeonLevel;
-                AddEnemyToWorld(enemy);
+                // enemy.DungeonLevel = dungeonLevel;
+                // enemy.WorldLocation = new IntVector3()
+                AddEnemyToLevel(enemy);
             }
         }
     }
 
-    private void AddEnemyToWorld(Creature enemy)
+    private void AddEnemyToLevel(Creature enemy)
     {
-        Enemies[enemy.DungeonLevel - 1].Add(enemy);
+        while (Enemies.Count < enemy.Location.Z)
+        {
+            Enemies.Add(new List<Creature>());
+        }
+        
+        Enemies[enemy.Location.Z - 1].Add(enemy);
         enemy.CreatureWasDestroyed += RemoveEnemyFromWorld;
     }
 
@@ -85,7 +117,7 @@ public class EnemyManager : DrawableGameComponent
     {
         var enemy = (Creature)sender;
         var a = (DestroyEventArgs)args;
-        Enemies[enemy.DungeonLevel - 1].Remove(enemy);
+        Enemies[enemy.Location.Z - 1].Remove(enemy);
         foreach (var item in a.ItemsDropped)
         {
             item.Location = enemy.Location;
@@ -95,7 +127,7 @@ public class EnemyManager : DrawableGameComponent
 
     private bool EnemyCapReached(int dungeonLevel)
     {
-        return Enemies[dungeonLevel - 1].Count > 10;
+        return EnemiesOnLevel(dungeonLevel).Count > 10;
     }
 
     private IntVector2 FindValidSpawnLocation(TileMap map, Creature enemy)
@@ -110,7 +142,7 @@ public class EnemyManager : DrawableGameComponent
             var y = _random.Next(map.Height);
             var tile = map.GetTileAt(new IntVector2(x, y));
             if (tile.Type is TileType.Void or TileType.Wall || tile.Location == player.Location) continue;
-            var path = pathfinder.FindPath(map, tile.Location, player.Location);
+            var path = pathfinder.FindPath(map, tile.Location.To2D, player.Location.To2D);
             if (path == null)
             {
                 //TODO: NEED TO FIND OUT WHY PATH IS SOMETIMES NULL
@@ -122,7 +154,7 @@ public class EnemyManager : DrawableGameComponent
                 continue;
             }
 
-            return tile.Location;
+            return tile.Location.To2D;
         } while (i < attempts);
         throw new NoValidLocationException(map, enemy, $"Could not find valid spawn location after {attempts} attempts");
     }

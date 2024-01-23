@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using Roguelike.Entity;
 using Roguelike.Entity.Feature;
+using Roguelike.Map;
 
 namespace Roguelike;
 

@@ -6,9 +6,11 @@ using Roguelike.Entity.Feature;
 
 namespace Roguelike.Map;
 
-public class MapManager : GameComponent
+public class MapManager : RoguelikeGameManager
 {
     public TileMap CurrentMap => _maps[_dungeonLevelIndex];
+    
+    private int _dungeonLevelIndex = 0;
     public int CurrentDungeonLevel
     {
         get => _dungeonLevelIndex + 1;
@@ -19,33 +21,42 @@ public class MapManager : GameComponent
         }
     }
 
-    private int _dungeonLevelIndex = 0;
+
     private readonly List<TileMap> _maps = new();
     private Random _random = new ();
 
-    // public event EventHandler NewLevelLoaded;
+    public event EventHandler DungeonLevelAdded;
     
     public MapManager(RoguelikeGame game) : base(game)
     {
-        game.BeginGame += BeginGame;
+    }
+    
+    protected override void OnConnectManagers(object sender, EventArgs e)
+    {
+        // This event happens when all the manager classes are loaded. This is where we
+        // subscribe to events from other managers.
+        base.OnConnectManagers(sender, e);
     }
 
-    private void BeginGame(object sender, EventArgs e)
+    protected override void OnBeginGame(object sender, EventArgs e)
     {
+        // This event happens upon beginning a new game. Managers are loaded/triggered in this order:
+        // Player -> Map -> Enemy -> Entity -> Input
       
         _maps.Clear();
-        AddDungeonLevel();
+        AddDungeonLevel(1);
         // NewLevelLoaded?.Invoke(this, EventArgs.Empty);
         
         var player = Game.Services.GetService<PlayerManager>().Player;
-        player.Location = _maps[^1].RandomAdjacentTile(_maps[^1].StairsUp.Location, 2).Location;
+        player.Location = _maps[^1].RandomAdjacentTile(_maps[^1].StairsUp.Location.To2D, 2).Location;
         player.EntityMoved += OnPlayerMoved;
+        base.OnBeginGame(sender, e);
     }
 
-    private void AddDungeonLevel()
+    private void AddDungeonLevel(int level)
     {
         var generator = new MapGenerator();
-        var map = generator.GenerateDungeonMap();
+        var map = generator.GenerateDungeonMap(level);
         _maps.Add(map);
         var newLevel = _maps.Count;
         map.StairsUp.DungeonLevel = newLevel;
@@ -55,11 +66,8 @@ public class MapManager : GameComponent
             var prevLevel = newLevel - 1;
             _maps[prevLevel - 1].StairsDown.LinkedPortal = map.StairsUp;
             map.StairsUp.LinkedPortal = _maps[prevLevel - 1].StairsDown;
-            var eman = Game.Services.GetService<EnemyManager>();
-            eman.Enemies.Add(new List<Creature>());
         }
-
-
+        DungeonLevelAdded?.Invoke(this, EventArgs.Empty);
     }
 
     public void MovePlayerToLevel(int level, IntVector2 spawnLoc)
@@ -79,8 +87,8 @@ public class MapManager : GameComponent
         //     }
         // }
         var player = Game.Services.GetService<PlayerManager>().Player;
-        player.DungeonLevel = level;
-        player.Location = spawnLoc;
+        // player.DungeonLevel = level;
+        player.Location = new IntVector3(spawnLoc.X, spawnLoc.Y, level);
         // NewLevelLoaded?.Invoke(this, EventArgs.Empty);
     }
 
@@ -99,11 +107,11 @@ public class MapManager : GameComponent
         }
         if (portal.LinkedPortal is null && portal.GetType() == typeof(StairsDown))
         {
-            AddDungeonLevel();
+            AddDungeonLevel(portal.DungeonLevel + 1);
             // portal.LinkedPortal = _maps[^1].StairsUp;
             CurrentDungeonLevel++;
         }
-        MovePlayerToLevel(CurrentDungeonLevel, CurrentMap.RandomAdjacentTile(portal.LinkedPortal!.Location, 2).Location);
+        MovePlayerToLevel(CurrentDungeonLevel, CurrentMap.RandomAdjacentTile(portal.LinkedPortal!.Location.To2D, 2).Location.To2D);
     }
 
     public void OnPlayerMoved(object sender, EventArgs args)
@@ -134,19 +142,23 @@ public class LevelChangeEventArgs : EventArgs
 {
     public int FromLevel;
     public int ToLevel;
-    public IntVector2 AtLocation;
+    public Portal PortalUsed;
+    public IntVector3 FromLocation;
+    public IntVector3 ToLocation;
 
-    public LevelChangeEventArgs(int fromLevel, int toLevel, Portal portal)
+    public LevelChangeEventArgs(int fromLevel, int toLevel, Portal portalUsed)
     {
         FromLevel = fromLevel;
         ToLevel = toLevel;
-        AtLocation = portal.Location;
+        PortalUsed = portalUsed;
+        FromLocation = portalUsed.Location;
+        ToLocation = portalUsed.LinkedPortal.Location;
     }
 
-    public LevelChangeEventArgs(int fromLevel, int toLevel, IntVector2 atLocation)
+    public LevelChangeEventArgs(int fromLevel, IntVector3 toLocation)
     {
         FromLevel = fromLevel;
-        ToLevel = toLevel;
-        AtLocation = atLocation;
+        ToLevel = toLocation.Z;
+        ToLocation = toLocation;
     }
 }

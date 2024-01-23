@@ -19,6 +19,7 @@ public class RoguelikeGame : Game
     public EntityManager EntityManager;
     public Player Player;
 
+    public event EventHandler ConnectManagers;
     public event EventHandler BeginGame;
 
 
@@ -65,7 +66,7 @@ public class RoguelikeGame : Game
         Components.Add(InputManager);
         Services.AddService(typeof(InputManager), InputManager);
 
-
+        ConnectManagers?.Invoke(this, EventArgs.Empty);
 
         base.Initialize();
     }
