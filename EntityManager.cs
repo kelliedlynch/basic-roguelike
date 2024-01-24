@@ -7,7 +7,17 @@ namespace Roguelike;
 
 public class EntityManager : DrawableGameComponent
 {
-    public List<Entity.Entity> Entities = new();
+    private List<List<Entity.Entity>> _entities = new(){new List<Entity.Entity>()};
+
+    public List<Entity.Entity> EntitiesOnLevel(int level)
+    {
+        if (_entities.Count >= level)
+        {
+            return _entities[level - 1];
+        }
+
+        return new List<Entity.Entity>();
+    }
     
     public EntityManager(RoguelikeGame game) : base(game)
     {
@@ -16,13 +26,17 @@ public class EntityManager : DrawableGameComponent
 
     public void AddEntityToWorld(Entity.Entity entity)
     {
-        Entities.Add(entity);
+        while (_entities.Count < entity.Location.Z)
+        {
+            _entities.Add(new List<Entity.Entity>());
+        }
+        _entities[entity.Location.Z - 1].Add(entity);
         entity.EntityWasDestroyed += RemoveEntityFromWorld;
     }
 
     public void RemoveEntityFromWorld(object sender, EventArgs args)
     {
         DestroyEventArgs a = (DestroyEventArgs)args;
-        Entities.Remove(a.Entity);
+        _entities[a.Entity.Location.Z - 1].Remove(a.Entity);
     }
 }

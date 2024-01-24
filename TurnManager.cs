@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Roguelike.Entity;
+using Roguelike.Entity.Creature;
 using Roguelike.Entity.Feature;
 using Roguelike.Map;
 using Roguelike.Utility;
@@ -11,11 +12,11 @@ namespace Roguelike;
 
 public class TurnManager : RoguelikeGameManager
 {
-    private bool _isProcessing = false;
+    // private bool _isProcessing = false;
 
     private TurnPhase _phase = TurnPhase.WAIT;
 
-    public event EventHandler EnterMovePhase;
+    // public event EventHandler EnterMovePhase;
 
     private Queue<MoveEventArgs> _moveQueue = new();
     private Queue<AttackEventArgs> _attackQueue = new();
@@ -68,7 +69,8 @@ public class TurnManager : RoguelikeGameManager
             }
             case TurnPhase.PRE_ACTION:
             {
-                var entities = Game.Services.GetService<EntityManager>().Entities;
+                var mapman = Game.Services.GetService<MapManager>();
+                var entities = Game.Services.GetService<EntityManager>().EntitiesOnLevel(mapman.CurrentDungeonLevel);
                 var player = Game.Services.GetService<PlayerManager>().Player;
                 for (var index = entities.Count - 1; index >= 0; index--)
                 {
@@ -93,11 +95,16 @@ public class TurnManager : RoguelikeGameManager
                         break;
                     }
                 }
-
-                _phase = _phase.Next();
+                break;
+            }
+            case TurnPhase.SPAWN:
+            {
+                var eman = Game.Services.GetService<EnemyManager>();
+                eman.RunSpawnCycle();
                 break;
             }
         }
+        _phase = _phase.Next();
 
         base.Update(gameTime);
     }
@@ -121,5 +128,6 @@ public enum TurnPhase
     MOVE,
     ATTACK,
     PRE_ACTION,
-    ACTION
+    ACTION,
+    SPAWN
 }

@@ -5,7 +5,7 @@ using StateMachine;
 
 namespace Roguelike.Entity;
 
-public class Player : Creature
+public class Player : Creature.Creature
 {
     public int Money = 0;
     

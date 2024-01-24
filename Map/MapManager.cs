@@ -46,7 +46,10 @@ public class MapManager : RoguelikeGameManager
         
         var player = Game.Services.GetService<PlayerManager>().Player;
         player.Location = _maps[^1].RandomAdjacentTile(_maps[^1].StairsUp.Location.To2D, 2).Location;
-        player.EntityMoved += OnPlayerMoved;
+        // player.EntityMoved += OnPlayerMoved;
+        var eman = Game.Services.GetService<EnemyManager>();
+        eman.InitNewGame();
+        eman.PopulateLevel(1);
         base.OnBeginGame(sender, e);
     }
 
@@ -64,6 +67,8 @@ public class MapManager : RoguelikeGameManager
             _maps[prevLevel - 1].StairsDown.LinkedPortal = map.StairsUp;
             map.StairsUp.LinkedPortal = _maps[prevLevel - 1].StairsDown;
         }
+
+
     }
 
     public void MovePlayerToLevel(int level, IntVector2 spawnLoc)
@@ -88,20 +93,20 @@ public class MapManager : RoguelikeGameManager
         // NewLevelLoaded?.Invoke(this, EventArgs.Empty);
     }
 
-    public void OnEnterTile(Entity.Entity entity, DungeonTile tile)
-    {
-        if (entity is Player)
-        {
-            foreach (var f in CurrentMap.Features[tile.X, tile.Y])
-            {
-                if (f is Portal p)
-                {
-                    UsePortal(p);
-                    return;
-                }
-            } 
-        }
-    }
+    // public void OnEnterTile(Entity.Entity entity, DungeonTile tile)
+    // {
+    //     if (entity is Player)
+    //     {
+    //         foreach (var f in CurrentMap.Features[tile.X, tile.Y])
+    //         {
+    //             if (f is Portal p)
+    //             {
+    //                 UsePortal(p);
+    //                 return;
+    //             }
+    //         } 
+    //     }
+    // }
 
     public void UsePortal(Portal portal)
     {
@@ -123,20 +128,22 @@ public class MapManager : RoguelikeGameManager
             CurrentDungeonLevel++;
         }
         MovePlayerToLevel(CurrentDungeonLevel, CurrentMap.RandomAdjacentTile(portal.LinkedPortal!.Location.To2D, 2).Location.To2D);
+        var eman = Game.Services.GetService<EnemyManager>();
+        eman.PopulateLevel(CurrentDungeonLevel);
     }
 
-    public void OnPlayerMoved(object sender, EventArgs args)
-    {
-        var a = (MoveEventArgs)args;
-        foreach (var f in CurrentMap.Features[a.ToLocation.X, a.ToLocation.Y])
-        {
-            if (f is Portal p)
-            {
-                UsePortal(p);
-                return;
-            }
-        }
-    }
+    // public void OnPlayerMoved(object sender, EventArgs args)
+    // {
+    //     var a = (MoveEventArgs)args;
+    //     foreach (var f in CurrentMap.Features[a.ToLocation.X, a.ToLocation.Y])
+    //     {
+    //         if (f is Portal p)
+    //         {
+    //             UsePortal(p);
+    //             return;
+    //         }
+    //     }
+    // }
     
 }
 

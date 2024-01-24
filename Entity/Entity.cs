@@ -5,17 +5,9 @@ namespace Roguelike.Entity;
 
 public class Entity : SpriteRepresented
 {
-    // public IntVector2 MapLocation
-    // {
-    //     get => new (_location.X, _location.Y);
-    //     set
-    //     {
-    //         if (value == MapLocation) return;
-    //         var args = new MoveEventArgs(this, new IntVector2(MapLocation.X, MapLocation.Y), value);
-    //         _location = new IntVector3(value.X, value.Y, _location.Z);
-    //         EntityMoved?.Invoke(this, args);
-    //     }
-    // }
+    public int Hp;
+    public int Atk;
+    public int Def;
 
     public virtual IntVector3 Location
     {
@@ -25,7 +17,7 @@ public class Entity : SpriteRepresented
             if (value == Location) return;
             var oldLoc = Location;
             _location = value;
-            InvokeEntityMoved(oldLoc, _location);
+            // InvokeEntityMoved(oldLoc, _location);
         }
     }
 
@@ -36,16 +28,29 @@ public class Entity : SpriteRepresented
     //     get => _location.Z;
     // }
 
-    public event EventHandler EntityWasCreated;
+    // public event EventHandler EntityWasCreated;
     public event EventHandler EntityWasDestroyed;
-    public event EventHandler EntityMoved;
+    // public event EventHandler EntityMoved;
 
-    protected virtual void InvokeEntityMoved(IntVector3 from, IntVector3 to)
+    // protected virtual void InvokeEntityMoved(IntVector3 from, IntVector3 to)
+    // {
+    //     var args = new MoveEventArgs(this, from, to);
+    //     EntityMoved?.Invoke(this, args);
+    // }
+
+    public virtual void TakeDamage(int dmg)
     {
-        var args = new MoveEventArgs(this, from, to);
-        EntityMoved?.Invoke(this, args);
-    }
+        var health = Hp - dmg;
+        if (health <= 0)
+        {
+            Hp = 0;
+            Destroy();
+            return;
+        }
 
+        Hp = health;
+    }
+    
     public virtual void Destroy()
     {
         EntityWasDestroyed?.Invoke(this, new DestroyEventArgs(this));

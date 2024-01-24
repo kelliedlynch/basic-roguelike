@@ -1,13 +1,13 @@
 using System;
-using System.Buffers.Text;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using Roguelike.Entity;
 
-namespace Roguelike.Entity;
+namespace Roguelike.Entity.Creature;
 
-public class Creature : Roguelike.Entity.Entity
+public class Creature : Entity
 {
+
+    
     public Pathfinder Pathfinder = new ();
     public event EventHandler CreatureWasDestroyed;
     public Creature()
@@ -25,7 +25,11 @@ public class Creature : Roguelike.Entity.Entity
     
     public virtual void AttackEntity(Entity entity)
     {
-        entity.Destroy();
+        var damage = Atk - entity.Def;
+        entity.TakeDamage(damage);
+        // entity.Destroy();
     }
-    
+
+
+
 }

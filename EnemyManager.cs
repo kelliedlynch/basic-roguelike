@@ -4,6 +4,7 @@ using System.Reflection.Metadata.Ecma335;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Roguelike.Entity;
+using Roguelike.Entity.Creature;
 using Roguelike.Map;
 
 namespace Roguelike;
@@ -39,28 +40,34 @@ public class EnemyManager : RoguelikeGameManager
     {
         // This event happens upon beginning a new game. Managers are loaded/triggered in this order:
         // Player -> Map -> Enemy -> Entity -> Input
-        _enemies = new List<List<Creature>>();
-        RunSpawnCycle();
+        // _enemies = new List<List<Creature>>();
+        // PopulateLevel(1);
         base.OnBeginGame(sender, e);
     }
 
-    public void OnAdvanceTurn(object sender, EventArgs e)
+    public void InitNewGame()
     {
-        RunSpawnCycle();
+        _enemies.Clear();
     }
 
-    private void RunSpawnCycle()
+    public void RunSpawnCycle()
     {
-        PlaceEnemies();
+        
     }
     
-    public void PlaceEnemies()
+    public void PopulateLevel(int level)
     {
-        var mapman = Game.Services.GetService<MapManager>();
-        var dungeonLevel = Game.Services.GetService<MapManager>().CurrentDungeonLevel;
-        while (!EnemyCapReached(dungeonLevel))
+        // Fill the dungeon level with randomly-placed monsters up to the cap
+        // Typically run when a level is first generated.
+        // Currently can only be run after player is placed on level, but I need to change that
+        while (_enemies.Count < level)
         {
-            SpawnNewEnemy(dungeonLevel);
+            _enemies.Add(new List<Creature>());
+        }
+
+        while (!EnemyCapReached(level))
+        {
+            SpawnNewEnemy(level);
         } 
     }
     

@@ -155,7 +155,7 @@ public class DrawEngine : DrawableGameComponent
 
         DrawFeatures(map, spriteBatch);
 
-        var ent = Game.Services.GetService<EntityManager>().Entities;
+        var ent = Game.Services.GetService<EntityManager>().EntitiesOnLevel(man.CurrentDungeonLevel);
         foreach (var entity in ent)
         {
             DrawSpriteAtLocation(entity, entity.Location.To2D, spriteBatch);
