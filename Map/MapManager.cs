@@ -21,12 +21,9 @@ public class MapManager : RoguelikeGameManager
         }
     }
 
-
     private readonly List<TileMap> _maps = new();
     private Random _random = new ();
 
-    public event EventHandler DungeonLevelAdded;
-    
     public MapManager(RoguelikeGame game) : base(game)
     {
     }
@@ -67,7 +64,6 @@ public class MapManager : RoguelikeGameManager
             _maps[prevLevel - 1].StairsDown.LinkedPortal = map.StairsUp;
             map.StairsUp.LinkedPortal = _maps[prevLevel - 1].StairsDown;
         }
-        DungeonLevelAdded?.Invoke(this, EventArgs.Empty);
     }
 
     public void MovePlayerToLevel(int level, IntVector2 spawnLoc)
@@ -90,6 +86,21 @@ public class MapManager : RoguelikeGameManager
         // player.DungeonLevel = level;
         player.Location = new IntVector3(spawnLoc.X, spawnLoc.Y, level);
         // NewLevelLoaded?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void OnEnterTile(Entity.Entity entity, DungeonTile tile)
+    {
+        if (entity is Player)
+        {
+            foreach (var f in CurrentMap.Features[tile.X, tile.Y])
+            {
+                if (f is Portal p)
+                {
+                    UsePortal(p);
+                    return;
+                }
+            } 
+        }
     }
 
     public void UsePortal(Portal portal)

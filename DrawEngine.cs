@@ -121,13 +121,26 @@ public class DrawEngine : DrawableGameComponent
         }
     }
 
-    public void DrawOverlay(SpriteBatch spriteBatch, Player player)
+    public void DrawTopBar(SpriteBatch spriteBatch, Player player)
     {
+        var topBarPadding = 6;
+        var labelSpacing = 4;
+        var elementSpacing = 12;
         var tex = Game.Content.Load<Texture2D>("Graphics/monochrome-transparent_packed");
-        var loc = new IntVector2(35, 16);
-        spriteBatch.Draw(tex, new Vector2(6, 6), new Rectangle(loc * _tileSize, _tileSize), Color.Gold);
         var font = Game.Content.Load<SpriteFont>("Fonts/Kenney Mini");
-        spriteBatch.DrawString(font, $"{player.Money}", new Vector2(24, 4), Color.Gold);
+        
+        var coinLoc = new IntVector2(35, 16);
+        spriteBatch.Draw(tex, new Vector2(topBarPadding, topBarPadding), new Rectangle(coinLoc * _tileSize, _tileSize), Color.Gold);
+        var moneyFieldEnd = topBarPadding + _tileSize.X + labelSpacing + font.MeasureString($"{player.Money}").X;
+        spriteBatch.DrawString(font, $"{player.Money}", new Vector2(topBarPadding + _tileSize.X + labelSpacing, topBarPadding), Color.Gold);
+        
+        
+        
+        var stairsLoc = new IntVector2(2, 6);
+        spriteBatch.Draw(tex, new Vector2(moneyFieldEnd + elementSpacing, topBarPadding), new Rectangle(stairsLoc * _tileSize, _tileSize), Color.Gold);
+        spriteBatch.DrawString(font, $"{player.Location.Z}", new Vector2(moneyFieldEnd + elementSpacing + _tileSize.X + labelSpacing, topBarPadding), Color.Gold);
+
+
     }
     
     
@@ -159,7 +172,7 @@ public class DrawEngine : DrawableGameComponent
             DrawSpriteAtLocation(enemy, enemy.Location.To2D, spriteBatch);
         }
 
-        DrawOverlay(spriteBatch, player);
+        DrawTopBar(spriteBatch, player);
         
         spriteBatch.End();
     }

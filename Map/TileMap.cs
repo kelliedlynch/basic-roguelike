@@ -19,7 +19,7 @@ public class TileMap
 
     private readonly Random _random = new();
     
-    public TileMap(int width, int height)
+    public TileMap(int width, int height, int level)
     {
         Width = width;
         Height = height;
@@ -30,7 +30,7 @@ public class TileMap
         {
             for (var j = 0; j < height; j++)
             {
-                Tiles[i, j] = new DungeonTile(i, j);
+                Tiles[i, j] = new DungeonTile(i, j, level);
                 Features[i, j] = new List<Feature>();
             }
         }

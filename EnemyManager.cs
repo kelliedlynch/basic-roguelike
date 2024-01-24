@@ -10,7 +10,7 @@ namespace Roguelike;
 
 public class EnemyManager : RoguelikeGameManager
 {
-    public List<List<Creature>> Enemies = new();
+    private List<List<Creature>> _enemies = new();
     private Random _random = new();
 
     public EnemyManager(RoguelikeGame game) : base(game)
@@ -20,9 +20,9 @@ public class EnemyManager : RoguelikeGameManager
     public List<Creature> EnemiesOnLevel(int level)
     {
         var l = new List<Creature>();
-        if (Enemies.Count >= level)
+        if (_enemies.Count >= level)
         {
-            l.AddRange(Enemies[level - 1]);
+            l.AddRange(_enemies[level - 1]);
         }
 
         return l;
@@ -32,8 +32,6 @@ public class EnemyManager : RoguelikeGameManager
     {
         // This event happens when all the manager classes are loaded. This is where we
         // subscribe to events from other managers.
-        Game.Services.GetService<MapManager>().DungeonLevelAdded += OnDungeonLevelAdded;
-        Game.Services.GetService<PlayerManager>().AdvanceTurn += OnAdvanceTurn;
         base.OnConnectManagers(sender, e);
     }
     
@@ -41,14 +39,9 @@ public class EnemyManager : RoguelikeGameManager
     {
         // This event happens upon beginning a new game. Managers are loaded/triggered in this order:
         // Player -> Map -> Enemy -> Entity -> Input
-        Enemies = new List<List<Creature>>();
+        _enemies = new List<List<Creature>>();
         RunSpawnCycle();
         base.OnBeginGame(sender, e);
-    }
-
-    public void OnDungeonLevelAdded(object sender, EventArgs e)
-    {
-        Enemies.Add(new List<Creature>());
     }
 
     public void OnAdvanceTurn(object sender, EventArgs e)
@@ -95,8 +88,6 @@ public class EnemyManager : RoguelikeGameManager
         {
             if (shouldAddEnemy)
             {
-                // enemy.DungeonLevel = dungeonLevel;
-                // enemy.WorldLocation = new IntVector3()
                 AddEnemyToLevel(enemy);
             }
         }
@@ -104,12 +95,12 @@ public class EnemyManager : RoguelikeGameManager
 
     private void AddEnemyToLevel(Creature enemy)
     {
-        while (Enemies.Count < enemy.Location.Z)
+        while (_enemies.Count < enemy.Location.Z)
         {
-            Enemies.Add(new List<Creature>());
+            _enemies.Add(new List<Creature>());
         }
         
-        Enemies[enemy.Location.Z - 1].Add(enemy);
+        _enemies[enemy.Location.Z - 1].Add(enemy);
         enemy.CreatureWasDestroyed += RemoveEnemyFromWorld;
     }
 
@@ -117,7 +108,7 @@ public class EnemyManager : RoguelikeGameManager
     {
         var enemy = (Creature)sender;
         var a = (DestroyEventArgs)args;
-        Enemies[enemy.Location.Z - 1].Remove(enemy);
+        _enemies[enemy.Location.Z - 1].Remove(enemy);
         foreach (var item in a.ItemsDropped)
         {
             item.Location = enemy.Location;
@@ -145,7 +136,6 @@ public class EnemyManager : RoguelikeGameManager
             var path = pathfinder.FindPath(map, tile.Location.To2D, player.Location.To2D);
             if (path == null)
             {
-                //TODO: NEED TO FIND OUT WHY PATH IS SOMETIMES NULL
                 throw new PathfinderException($"Could not find path from {tile.Location} to {player.Location}");
             }
             if (path.Count < 7)

@@ -16,7 +16,7 @@ public class MapGenerator
     // Creates a dungeon-style map, with rectangular rooms and narrow passages connecting them
     public TileMap GenerateDungeonMap(int dungeonLevel)
     {
-        var map = new TileMap(_mapSize.X, _mapSize.Y);
+        var map = new TileMap(_mapSize.X, _mapSize.Y, dungeonLevel);
         
         // Divide grid into regions that could contain rooms
         var currentOrigin = new IntVector2(0, 0);

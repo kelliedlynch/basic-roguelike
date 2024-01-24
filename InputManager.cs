@@ -1,5 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using StateMachine;
+using StateMachine.Fluent.Api;
 
 namespace Roguelike;
 
@@ -11,9 +13,35 @@ public class InputManager : GameComponent
     private double _fastMoveTimer;
     private const double FastMoveInterval = .15;
 
+    // private enum PlayerState
+    // {
+    //     MOVING,
+    //     WAITING
+    // };
+    //
+    // private enum PlayerTrigger
+    // {
+    //     ARROW_PRESSED,
+    //     MOVE_COMPLETED
+    // }
+    // private Fsm<PlayerState, PlayerTrigger> _playerMachine;
+
     public InputManager(RoguelikeGame game) : base(game)
     {
-        
+        // _playerMachine = Fsm<PlayerState, PlayerTrigger>.Builder(PlayerState.WAITING)
+        //     .State(PlayerState.WAITING)
+        //         .TransitionTo(PlayerState.MOVING).On(PlayerTrigger.ARROW_PRESSED)
+        //         .OnEnter(e =>
+        //         {
+        //
+        //         })
+        //     .State(PlayerState.MOVING)
+        //         .TransitionTo(PlayerState.WAITING).On(PlayerTrigger.MOVE_COMPLETED)
+        //         .OnEnter(e =>
+        //         {
+        //             
+        //         })
+        //     .Build();
     }
     
     
@@ -37,7 +65,7 @@ public class InputManager : GameComponent
             }
 
 
-            var destination = manager.Player.Location.To2D;
+            var destination = Game.Services.GetService<PlayerManager>().Player.Location.To2D;
             if (keyboard.IsKeyDown(Keys.Up))
             {
                 destination += Direction.Up;
@@ -55,9 +83,10 @@ public class InputManager : GameComponent
                 destination += Direction.Right;
             }
 
-
+            
             
             manager.AttemptMove(new IntVector3(destination, manager.Player.Location.Z));
+            
         }
         else if (_keyIsPressed && keyboard.GetPressedKeys().Length > 0)
         {

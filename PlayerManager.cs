@@ -9,9 +9,7 @@ namespace Roguelike;
 public class PlayerManager : RoguelikeGameManager
 {
     public Player Player = new();
-
-    public event EventHandler AdvanceTurn;
-    
+  
     public PlayerManager(RoguelikeGame game) : base(game)
     {
     }
@@ -30,44 +28,32 @@ public class PlayerManager : RoguelikeGameManager
         base.OnBeginGame(sender, e);
     }
 
-    // public void SpawnInPlayer(object sender, EventArgs e)
-    // {
-    //     var map = Game.Services.GetService<MapManager>().CurrentMap;
-    //     Player.Location = map.EntryPoint;
-    // }
-
     public void AttemptMove(IntVector3 loc)
     {
-        var man = Game.Services.GetService<MapManager>();
-        var map = man.CurrentMap;
-        var path = Player.Pathfinder.FindPath(map, Player.Location.To2D, loc.To2D);
-        if (path is null || path.Count == 0)
-        {
-            return;
-        }
-        var enemies = Game.Services.GetService<EnemyManager>().EnemiesOnLevel(man.CurrentDungeonLevel);
+        var mapManager = Game.Services.GetService<MapManager>();
+        var map = mapManager.CurrentMap;
+        var turnManager = Game.Services.GetService<TurnManager>();
+        if (!Player.CanMoveToTile(map, map.GetTileAt(loc.To2D))) return;
+        
+        var enemies = Game.Services.GetService<EnemyManager>().EnemiesOnLevel(mapManager.CurrentDungeonLevel);
+        var skipMove = false;
         for (var index = enemies.Count - 1; index >= 0; index--)
         {
             var enemy = enemies[index];
-            if (enemy.Location == loc)
-            {
-                Player.AttackEntity(enemy);
-                return;
-            }
+            if (enemy.Location != loc) continue;
+            var atk = new AttackEventArgs(Player, enemy);
+            turnManager.QueueAttack(atk);
+            skipMove = true;
         }
-
-        var entities = Game.Services.GetService<EntityManager>().Entities;
-        for (var index = entities.Count - 1; index >= 0; index--)
-        {
-            var entity = entities[index];
-            if (entity.Location == loc)
-            {
-                Player.PickUp(entity);
-            }
-        }
-
-        Player.Location = loc;
-        AdvanceTurn?.Invoke(this, EventArgs.Empty);
         
+        if(!skipMove)
+        {
+            var move = new MoveEventArgs(Player, Player.Location, loc);
+
+            turnManager.QueueMove(move);
+        }
+        
+        // TODO: SHOULD THIS BE CALLED SOMEWHERE ELSE?
+        turnManager.ProcessTurn(this, EventArgs.Empty);
     }
 }

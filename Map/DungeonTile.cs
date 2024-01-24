@@ -56,10 +56,11 @@ public class DungeonTile : SpriteRepresented
         }
     }
 
-    public DungeonTile(int x, int y)
+    public DungeonTile(int x, int y, int z)
     {
         X = x;
         Y = y;
+        Z = z;
         Color = Color.White;
     }
 

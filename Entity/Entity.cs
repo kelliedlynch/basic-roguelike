@@ -17,19 +17,19 @@ public class Entity : SpriteRepresented
     //     }
     // }
 
-    public IntVector3 Location
+    public virtual IntVector3 Location
     {
         get => _location;
         set
         {
             if (value == Location) return;
-            var args = new MoveEventArgs(this, Location, value);
+            var oldLoc = Location;
             _location = value;
-            EntityMoved?.Invoke(this, args);
+            InvokeEntityMoved(oldLoc, _location);
         }
     }
 
-    private IntVector3 _location;
+    protected IntVector3 _location;
 
     // public int DungeonLevel
     // {
@@ -39,6 +39,12 @@ public class Entity : SpriteRepresented
     public event EventHandler EntityWasCreated;
     public event EventHandler EntityWasDestroyed;
     public event EventHandler EntityMoved;
+
+    protected virtual void InvokeEntityMoved(IntVector3 from, IntVector3 to)
+    {
+        var args = new MoveEventArgs(this, from, to);
+        EntityMoved?.Invoke(this, args);
+    }
 
     public virtual void Destroy()
     {

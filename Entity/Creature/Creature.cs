@@ -22,4 +22,10 @@ public class Creature : Roguelike.Entity.Entity
         var args = new DestroyEventArgs(this, new List<Entity>() { coin });
         CreatureWasDestroyed?.Invoke(this, args);
     }
+    
+    public virtual void AttackEntity(Entity entity)
+    {
+        entity.Destroy();
+    }
+    
 }
