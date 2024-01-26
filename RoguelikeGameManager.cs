@@ -15,6 +15,7 @@ public class RoguelikeGameManager : GameComponent
     public InputManager InputManager;
     public EntityManager EntityManager;
     public TurnManager TurnManager;
+    public ActivityLog ActivityLog;
     public Player Player => Game.Services.GetService<PlayerManager>().Player;
     
     public RoguelikeGameManager(RoguelikeGame game) : base(game)
@@ -33,6 +34,7 @@ public class RoguelikeGameManager : GameComponent
         InputManager = Game.Services.GetService<InputManager>();
         EntityManager = Game.Services.GetService<EntityManager>();
         TurnManager = Game.Services.GetService<TurnManager>();
+        ActivityLog = Game.Services.GetService<ActivityLog>();
     }
     
     protected virtual void OnBeginGame(object sender, EventArgs e)

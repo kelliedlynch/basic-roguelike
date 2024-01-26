@@ -14,6 +14,7 @@ public class Creature : Entity
     {
         SpriteLocation = new IntVector2(25, 2);
         Color = Color.Silver;
+        EntityName = "Generic Creature";
     }
 
     public override void Destroy()
@@ -27,6 +28,8 @@ public class Creature : Entity
     {
         var damage = Atk - entity.Def;
         entity.TakeDamage(damage);
+        var args = new ActivityLogEventArgs($"{Name} hit {entity.Name} for {damage} damage");
+        LogEvent(args);
         // entity.Destroy();
     }
 

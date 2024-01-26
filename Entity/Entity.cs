@@ -9,6 +9,24 @@ public class Entity : SpriteRepresented
     public int Atk = 5;
     public int Def = 1;
 
+    public string EntityName = "Generic Entity";
+
+    public string Name
+    {
+        get
+        {
+            if (_name != "") return _name;
+            return EntityName;
+        }
+        set
+        {
+            _name = value;
+        }
+    }
+    public string _name = "";
+
+    public event EventHandler OnLogEvent;
+
     public virtual IntVector3 Location
     {
         get => _location;
@@ -50,10 +68,23 @@ public class Entity : SpriteRepresented
 
         Hp = health;
     }
+
+    public void LogEvent(EventArgs args)
+    {
+        var a = (ActivityLogEventArgs)args;
+        OnLogEvent?.Invoke(this, a);
+    }
+    
+    public void LogEvent(string message)
+    {
+        var args = new ActivityLogEventArgs(message);
+        LogEvent(args);
+    }
     
     public virtual void Destroy()
     {
         EntityWasDestroyed?.Invoke(this, new DestroyEventArgs(this));
+        LogEvent($"{Name} was destroyed");
     }
 
 

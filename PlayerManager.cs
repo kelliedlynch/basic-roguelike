@@ -24,6 +24,7 @@ public class PlayerManager : RoguelikeGameManager
     public void InitializePlayer()
     {
         Player = new();
+        Player.OnLogEvent += ActivityLog.LogEvent;
     }
 
     public void AttemptMove(IntVector3 loc)
@@ -50,8 +51,5 @@ public class PlayerManager : RoguelikeGameManager
 
             turnManager.QueueMove(move);
         }
-        
-        // TODO: SHOULD THIS BE CALLED SOMEWHERE ELSE?
-        turnManager.ProcessTurn(this, EventArgs.Empty);
     }
 }

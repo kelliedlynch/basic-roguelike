@@ -18,6 +18,7 @@ public class RoguelikeGame : Game
     public InputManager InputManager;
     public EntityManager EntityManager;
     public TurnManager TurnManager;
+    public ActivityLog ActivityLog;
 
     public event EventHandler ConnectManagers;
     // public event EventHandler BeginGame;
@@ -69,6 +70,10 @@ public class RoguelikeGame : Game
         TurnManager = new TurnManager(this);
         Components.Add(TurnManager);
         Services.AddService(TurnManager);
+
+        ActivityLog = new ActivityLog(this);
+        Components.Add(ActivityLog);
+        Services.AddService(ActivityLog);
 
         ConnectManagers?.Invoke(this, EventArgs.Empty);
 

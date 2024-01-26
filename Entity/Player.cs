@@ -27,6 +27,7 @@ public class Player : Creature.Creature
         Hp = 20;
         Atk = 8;
         Def = 3;
+        Name = "Player";
     }
 
     public void PickUp(Entity entity)
@@ -35,6 +36,7 @@ public class Player : Creature.Creature
         {
             Money += money.Value;
             entity.Destroy();
+            LogEvent($"{Name} picked up {money.Value} gold");
         }
     }
 

@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Roguelike;
 
-public class InputManager : GameComponent
+public class InputManager : RoguelikeGameManager
 {
     private bool _keyIsPressed;
     private double _keyDownTime;
@@ -11,42 +11,14 @@ public class InputManager : GameComponent
     private double _fastMoveTimer;
     private const double FastMoveInterval = .15;
 
-    // private enum PlayerState
-    // {
-    //     MOVING,
-    //     WAITING
-    // };
-    //
-    // private enum PlayerTrigger
-    // {
-    //     ARROW_PRESSED,
-    //     MOVE_COMPLETED
-    // }
-    // private Fsm<PlayerState, PlayerTrigger> _playerMachine;
-
     public InputManager(RoguelikeGame game) : base(game)
     {
-        // _playerMachine = Fsm<PlayerState, PlayerTrigger>.Builder(PlayerState.WAITING)
-        //     .State(PlayerState.WAITING)
-        //         .TransitionTo(PlayerState.MOVING).On(PlayerTrigger.ARROW_PRESSED)
-        //         .OnEnter(e =>
-        //         {
-        //
-        //         })
-        //     .State(PlayerState.MOVING)
-        //         .TransitionTo(PlayerState.WAITING).On(PlayerTrigger.MOVE_COMPLETED)
-        //         .OnEnter(e =>
-        //         {
-        //             
-        //         })
-        //     .Build();
+
     }
     
     
     public override void Update(GameTime gameTime)
     {
-        var manager = Game.Services.GetService<PlayerManager>();
-        // var map = Game.Services.GetService<MapManager>().CurrentMap;
         var keyboard = Keyboard.GetState();
         if (!_keyIsPressed || (_keyIsPressed && _keyDownTime > FastMoveDelay) || _fastMoveTimer > FastMoveInterval)
         {
@@ -63,27 +35,46 @@ public class InputManager : GameComponent
             }
 
 
-            var destination = Game.Services.GetService<PlayerManager>().Player.Location.To2D;
-            if (keyboard.IsKeyDown(Keys.Up))
+            var destination = Player.Location.To2D;
+            if (keyboard.IsKeyDown(Keys.Up) || keyboard.IsKeyDown(Keys.NumPad8))
             {
                 destination += Direction.Up;
             }
-            else if (keyboard.IsKeyDown(Keys.Down))
+            else if (keyboard.IsKeyDown(Keys.Down) || keyboard.IsKeyDown(Keys.NumPad2))
             {
                 destination += Direction.Down;
             }
-            else if (keyboard.IsKeyDown(Keys.Left))
+            else if (keyboard.IsKeyDown(Keys.Left) || keyboard.IsKeyDown(Keys.NumPad4))
             {
                 destination += Direction.Left;
             }
-            else if (keyboard.IsKeyDown(Keys.Right))
+            else if (keyboard.IsKeyDown(Keys.Right) || keyboard.IsKeyDown(Keys.NumPad6))
             {
                 destination += Direction.Right;
             }
-
-            
-            
-            manager.AttemptMove(new IntVector3(destination, manager.Player.Location.Z));
+            else if (keyboard.IsKeyDown(Keys.NumPad7))
+            {
+                destination += Direction.Left + Direction.Up;
+            }
+            else if (keyboard.IsKeyDown(Keys.NumPad9))
+            {
+                destination += Direction.Right + Direction.Up;
+            }
+            else if (keyboard.IsKeyDown(Keys.NumPad1))
+            {
+                destination += Direction.Left + Direction.Down;
+            }
+            else if (keyboard.IsKeyDown(Keys.NumPad3))
+            {
+                destination += Direction.Right + Direction.Down;
+            }
+            else if (keyboard.IsKeyDown(Keys.NumPad5))
+            {
+                TurnManager.ProcessTurn();
+                return;
+            }
+            PlayerManager.AttemptMove(new IntVector3(destination, Player.Location.Z));
+            TurnManager.ProcessTurn();
             
         }
         else if (_keyIsPressed && keyboard.GetPressedKeys().Length > 0)

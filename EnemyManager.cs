@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Cryptography;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Roguelike.Entity;
 using Roguelike.Entity.Creature;
 using Roguelike.Map;
@@ -28,22 +25,6 @@ public class EnemyManager : RoguelikeGameManager
         }
 
         return l;
-    }
-
-    protected override void OnConnectManagers(object sender, EventArgs e)
-    {
-        // This event happens when all the manager classes are loaded. This is where we
-        // subscribe to events from other managers.
-        base.OnConnectManagers(sender, e);
-    }
-    
-    protected override void OnBeginGame(object sender, EventArgs e)
-    {
-        // This event happens upon beginning a new game. Managers are loaded/triggered in this order:
-        // Player -> Map -> Enemy -> Entity -> Input
-        // _enemies = new List<List<Creature>>();
-        // PopulateLevel(1);
-        base.OnBeginGame(sender, e);
     }
 
     public void InitializeEnemies()
@@ -109,6 +90,7 @@ public class EnemyManager : RoguelikeGameManager
         }
         
         _enemies[enemy.Location.Z - 1].Add(enemy);
+        enemy.OnLogEvent += ActivityLog.LogEvent;
         enemy.CreatureWasDestroyed += RemoveEnemyFromWorld;
     }
 

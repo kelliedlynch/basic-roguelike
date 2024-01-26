@@ -35,7 +35,7 @@ public class TurnManager : RoguelikeGameManager
     }
     
 
-    public void ProcessTurn(object sender, EventArgs args)
+    public void ProcessTurn()
     {
         if (_phase == TurnPhase.Wait)
         {
