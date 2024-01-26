@@ -11,12 +11,7 @@ public class EntityManager : DrawableGameComponent
 
     public List<Entity.Entity> EntitiesOnLevel(int level)
     {
-        if (_entities.Count >= level)
-        {
-            return _entities[level - 1];
-        }
-
-        return new List<Entity.Entity>();
+        return _entities.Count >= level ? _entities[level - 1] : new List<Entity.Entity>();
     }
     
     public EntityManager(RoguelikeGame game) : base(game)

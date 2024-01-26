@@ -18,10 +18,9 @@ public class RoguelikeGame : Game
     public InputManager InputManager;
     public EntityManager EntityManager;
     public TurnManager TurnManager;
-    public Player Player;
 
     public event EventHandler ConnectManagers;
-    public event EventHandler BeginGame;
+    // public event EventHandler BeginGame;
 
 
     // private void OnBeginGame(EventArgs e)
@@ -83,9 +82,16 @@ public class RoguelikeGame : Game
 
     protected override void BeginRun()
     {
-        BeginGame?.Invoke(this, EventArgs.Empty);
+        BeginGame();
         
         base.BeginRun();
+    }
+
+    private void BeginGame()
+    {
+        PlayerManager.InitializePlayer();
+        MapManager.InitializeMaps();
+        EnemyManager.InitializeEnemies();
     }
 
     protected override void Update(GameTime gameTime)
@@ -95,7 +101,7 @@ public class RoguelikeGame : Game
 
         if (Keyboard.GetState().IsKeyDown(Keys.Space))
         {
-            BeginGame?.Invoke(this, EventArgs.Empty);
+            BeginGame();
             // EnemyManager.Enemies = new List<Creature>();
             // PlayerManager.SpawnInPlayer(DrawEngine.TileMap);
         }

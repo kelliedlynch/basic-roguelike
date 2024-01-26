@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
-using Roguelike.Entity;
 using Roguelike.Entity.Feature;
 
 namespace Roguelike.Map;
@@ -14,11 +12,7 @@ public class MapManager : RoguelikeGameManager
     public int CurrentDungeonLevel
     {
         get => _dungeonLevelIndex + 1;
-        set
-        {
-            _dungeonLevelIndex = value - 1;
-
-        }
+        private set => _dungeonLevelIndex = value - 1;
     }
 
     private readonly List<TileMap> _maps = new();
@@ -35,22 +29,13 @@ public class MapManager : RoguelikeGameManager
         base.OnConnectManagers(sender, e);
     }
 
-    protected override void OnBeginGame(object sender, EventArgs e)
+    public void InitializeMaps()
     {
-        // This event happens upon beginning a new game. Managers are loaded/triggered in this order:
-        // Player -> Map -> Enemy -> Entity -> Input
-      
         _maps.Clear();
+        _dungeonLevelIndex = 0;
         AddDungeonLevel(1);
-        // NewLevelLoaded?.Invoke(this, EventArgs.Empty);
-        
-        var player = Game.Services.GetService<PlayerManager>().Player;
-        player.Location = _maps[^1].RandomAdjacentTile(_maps[^1].StairsUp.Location.To2D, 2).Location;
-        // player.EntityMoved += OnPlayerMoved;
-        var eman = Game.Services.GetService<EnemyManager>();
-        eman.InitNewGame();
-        eman.PopulateLevel(1);
-        base.OnBeginGame(sender, e);
+       
+        Player.Location = _maps[^1].RandomAdjacentTile(_maps[^1].StairsUp.Location.To2D, 2).Location;
     }
 
     private void AddDungeonLevel(int level)
@@ -67,8 +52,6 @@ public class MapManager : RoguelikeGameManager
             _maps[prevLevel - 1].StairsDown.LinkedPortal = map.StairsUp;
             map.StairsUp.LinkedPortal = _maps[prevLevel - 1].StairsDown;
         }
-
-
     }
 
     public void MovePlayerToLevel(int level, IntVector2 spawnLoc)
@@ -77,20 +60,9 @@ public class MapManager : RoguelikeGameManager
         {
             throw new InvalidDungeonLevelException($"Tried to go to invalid dungeon level {level}");
         }
-        // if (_currentDungeonLevel > _maps.Count)
-        // {
-        //     for (int i = 0; i <= _currentDungeonLevel - _maps.Count; i++)
-        //     {
-        //         var stairsDown = _maps[^2].StairsDown;
-        //         AddDungeonLevel();
-        //         _maps[^1].StairsUp.LinkedPortal = stairsDown;
-        //         stairsDown.LinkedPortal = _maps[^1].StairsUp;
-        //     }
-        // }
+
         var player = Game.Services.GetService<PlayerManager>().Player;
-        // player.DungeonLevel = level;
         player.Location = new IntVector3(spawnLoc.X, spawnLoc.Y, level);
-        // NewLevelLoaded?.Invoke(this, EventArgs.Empty);
     }
 
     // public void OnEnterTile(Entity.Entity entity, DungeonTile tile)
@@ -128,8 +100,7 @@ public class MapManager : RoguelikeGameManager
             CurrentDungeonLevel++;
         }
         MovePlayerToLevel(CurrentDungeonLevel, CurrentMap.RandomAdjacentTile(portal.LinkedPortal!.Location.To2D, 2).Location.To2D);
-        var eman = Game.Services.GetService<EnemyManager>();
-        eman.PopulateLevel(CurrentDungeonLevel);
+        EnemyManager.PopulateLevel(CurrentDungeonLevel);
     }
 
     // public void OnPlayerMoved(object sender, EventArgs args)

@@ -1,7 +1,5 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using StateMachine;
-using StateMachine.Fluent.Api;
 
 namespace Roguelike;
 

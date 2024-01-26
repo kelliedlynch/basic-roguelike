@@ -4,9 +4,7 @@ using Microsoft.Xna.Framework;
 using Roguelike.Entity;
 using Roguelike.Entity.Creature;
 using Roguelike.Entity.Feature;
-using Roguelike.Map;
 using Roguelike.Utility;
-using StateMachine;
 
 namespace Roguelike;
 
@@ -14,7 +12,7 @@ public class TurnManager : RoguelikeGameManager
 {
     // private bool _isProcessing = false;
 
-    private TurnPhase _phase = TurnPhase.WAIT;
+    private TurnPhase _phase = TurnPhase.Wait;
 
     // public event EventHandler EnterMovePhase;
 
@@ -39,9 +37,9 @@ public class TurnManager : RoguelikeGameManager
 
     public void ProcessTurn(object sender, EventArgs args)
     {
-        if (_phase == TurnPhase.WAIT)
+        if (_phase == TurnPhase.Wait)
         {
-            _phase = TurnPhase.MOVE;
+            _phase = TurnPhase.PlayerMove;
         }
     }
 
@@ -49,62 +47,83 @@ public class TurnManager : RoguelikeGameManager
     {
         switch (_phase)
         {
-            case TurnPhase.MOVE:
+            case TurnPhase.PlayerMove:
             {
                 while (_moveQueue.Count > 0)
                 {
                     var move = _moveQueue.Dequeue();
                     move.Entity.Location = move.ToLocation;
                 }
+          
+                _phase = _phase.Next();
                 break;
             }
-            case TurnPhase.ATTACK:
+            case TurnPhase.Attack:
             {
+                // currently we need to loop twice because if an enemy is destroyed, its attack is not removed from the queue
+                // TODO: change that
                 while (_attackQueue.Count > 0)
                 {
                     var attack = _attackQueue.Dequeue();
                     attack.Attacker.AttackEntity(attack.Defender);
                 }
+                EnemyManager.QueueEnemyAttacks();
+                while (_attackQueue.Count > 0)
+                {
+                    var attack = _attackQueue.Dequeue();
+                    attack.Attacker.AttackEntity(attack.Defender);
+                }
+                _phase = _phase.Next();
                 break;
             }
-            case TurnPhase.PRE_ACTION:
+            case TurnPhase.PreAction:
             {
-                var mapman = Game.Services.GetService<MapManager>();
-                var entities = Game.Services.GetService<EntityManager>().EntitiesOnLevel(mapman.CurrentDungeonLevel);
-                var player = Game.Services.GetService<PlayerManager>().Player;
+                var entities = EntityManager.EntitiesOnLevel(MapManager.CurrentDungeonLevel);
                 for (var index = entities.Count - 1; index >= 0; index--)
                 {
                     var entity = entities[index];
-                    if (entity.Location == player.Location)
+                    if (entity.Location == Player.Location)
                     {
-                        player.PickUp(entity);
+                        Player.PickUp(entity);
                     }
                 }
+                _phase = _phase.Next();
                 break;
             }
-            case TurnPhase.ACTION:
+            case TurnPhase.Action:
             {
-                var player = Game.Services.GetService<PlayerManager>().Player;
-                var mapManager = Game.Services.GetService<MapManager>();
-                var features = mapManager.CurrentMap.Features[player.Location.X, player.Location.Y];
+                var features = MapManager.CurrentMap.Features[Player.Location.X, Player.Location.Y];
                 foreach (var feature in features)
                 {
                     if (feature is Portal portal)
                     {
-                        mapManager.UsePortal(portal);
+                        MapManager.UsePortal(portal);
                         break;
                     }
                 }
+                _phase = _phase.Next();
                 break;
             }
-            case TurnPhase.SPAWN:
+            case TurnPhase.EnemyMove:
             {
-                var eman = Game.Services.GetService<EnemyManager>();
-                eman.RunSpawnCycle();
+                EnemyManager.QueueEnemyMoves();
+                while (_moveQueue.Count > 0)
+                {
+                    var move = _moveQueue.Dequeue();
+                    move.Entity.Location = move.ToLocation;
+                }
+
+                _phase = _phase.Next();
+                break;
+            }
+            case TurnPhase.Spawn:
+            {
+                EnemyManager.RunSpawnCycle();
+                _phase = _phase.Next();
                 break;
             }
         }
-        _phase = _phase.Next();
+        
 
         base.Update(gameTime);
     }
@@ -124,10 +143,11 @@ public class AttackEventArgs : EventArgs
 
 public enum TurnPhase
 {
-    WAIT,
-    MOVE,
-    ATTACK,
-    PRE_ACTION,
-    ACTION,
-    SPAWN
+    Wait,
+    PlayerMove,
+    Attack,
+    PreAction,
+    Action,
+    EnemyMove,
+    Spawn
 }

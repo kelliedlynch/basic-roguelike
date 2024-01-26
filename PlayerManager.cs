@@ -21,11 +21,9 @@ public class PlayerManager : RoguelikeGameManager
         base.OnConnectManagers(sender, e);
     }
     
-    protected override void OnBeginGame(object sender, EventArgs e)
+    public void InitializePlayer()
     {
-        // This event happens upon beginning a new game. Managers are loaded/triggered in this order:
-        // Player -> Map -> Enemy -> Entity -> Input
-        base.OnBeginGame(sender, e);
+        Player = new();
     }
 
     public void AttemptMove(IntVector3 loc)

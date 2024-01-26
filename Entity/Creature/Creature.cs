@@ -30,6 +30,10 @@ public class Creature : Entity
         // entity.Destroy();
     }
 
-
+    public bool CanSeeEntity(TileMap map, Entity entity)
+    {
+        var path = Pathfinder.FindPath(map, Location.To2D, entity.Location.To2D);
+        return (path.Count < 10);
+    }
 
 }

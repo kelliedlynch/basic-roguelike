@@ -1,7 +1,5 @@
 using Microsoft.Xna.Framework;
-using Roguelike.Entity;
 using Roguelike.Map;
-using StateMachine;
 
 namespace Roguelike.Entity;
 
@@ -26,7 +24,9 @@ public class Player : Creature.Creature
     {
         SpriteLocation = new IntVector2(27, 0);
         Color = Color.Aqua;
-
+        Hp = 20;
+        Atk = 8;
+        Def = 3;
     }
 
     public void PickUp(Entity entity)

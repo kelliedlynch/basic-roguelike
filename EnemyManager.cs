@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection.Metadata.Ecma335;
+using System.Security.Cryptography;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Roguelike.Entity;
@@ -45,9 +46,10 @@ public class EnemyManager : RoguelikeGameManager
         base.OnBeginGame(sender, e);
     }
 
-    public void InitNewGame()
+    public void InitializeEnemies()
     {
         _enemies.Clear();
+        PopulateLevel(1);
     }
 
     public void RunSpawnCycle()
@@ -73,12 +75,11 @@ public class EnemyManager : RoguelikeGameManager
     
     private void SpawnNewEnemy(int dungeonLevel)
     {
-        var map = Game.Services.GetService<MapManager>().CurrentMap;
         var enemy = new Creature();
         var shouldAddEnemy = true;
         try
         {
-            var loc = FindValidSpawnLocation(map, enemy);
+            var loc = FindValidSpawnLocation(MapManager.CurrentMap, enemy);
             enemy.Location = new IntVector3(loc.X, loc.Y, dungeonLevel);
         }
         catch (PathfinderException e)
@@ -119,7 +120,38 @@ public class EnemyManager : RoguelikeGameManager
         foreach (var item in a.ItemsDropped)
         {
             item.Location = enemy.Location;
-            Game.Services.GetService<EntityManager>().AddEntityToWorld(item);
+            EntityManager.AddEntityToWorld(item);
+        }
+    }
+
+    public void QueueEnemyAttacks()
+    {
+        foreach (var enemy in EnemiesOnLevel(MapManager.CurrentDungeonLevel))
+        {
+            var adjacent = MapManager.CurrentMap.GetAdjacentTiles(enemy.Location.To2D, 2);
+            foreach (var a in adjacent)
+            {
+                if (a.Location != Player.Location) continue;
+                var args = new AttackEventArgs(enemy, Player);
+                TurnManager.QueueAttack(args);
+                break;
+            }
+
+        }
+    }
+
+    public void QueueEnemyMoves()
+    {
+        foreach (var enemy in EnemiesOnLevel(MapManager.CurrentDungeonLevel))
+        {
+            if (enemy.CanSeeEntity(MapManager.CurrentMap, Player))
+            {
+                var path = enemy.Pathfinder.FindPath(MapManager.CurrentMap, enemy.Location.To2D, Player.Location.To2D);
+                if (path.Count <= 1) continue;
+                var tile = path.Pop();
+                var args = new MoveEventArgs(enemy, enemy.Location.To2D, tile.Location.To2D);
+                TurnManager.QueueMove(args);
+            }
         }
     }
 
@@ -131,7 +163,6 @@ public class EnemyManager : RoguelikeGameManager
     private IntVector2 FindValidSpawnLocation(TileMap map, Creature enemy)
     {
         var attempts = 200;
-        var player = Game.Services.GetService<PlayerManager>().Player;
         var pathfinder = new Pathfinder();
         var i = 0;
         do
@@ -139,11 +170,11 @@ public class EnemyManager : RoguelikeGameManager
             var x = _random.Next(map.Width);
             var y = _random.Next(map.Height);
             var tile = map.GetTileAt(new IntVector2(x, y));
-            if (tile.Type is TileType.Void or TileType.Wall || tile.Location == player.Location) continue;
-            var path = pathfinder.FindPath(map, tile.Location.To2D, player.Location.To2D);
+            if (tile.Type is TileType.Void or TileType.Wall || tile.Location == Player.Location) continue;
+            var path = pathfinder.FindPath(map, tile.Location.To2D, Player.Location.To2D);
             if (path == null)
             {
-                throw new PathfinderException($"Could not find path from {tile.Location} to {player.Location}");
+                throw new PathfinderException($"Could not find path from {tile.Location} to {Player.Location}");
             }
             if (path.Count < 7)
             {

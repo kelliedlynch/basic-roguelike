@@ -5,9 +5,9 @@ namespace Roguelike.Entity;
 
 public class Entity : SpriteRepresented
 {
-    public int Hp;
-    public int Atk;
-    public int Def;
+    public int Hp = 10;
+    public int Atk = 5;
+    public int Def = 1;
 
     public virtual IntVector3 Location
     {

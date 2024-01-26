@@ -129,17 +129,19 @@ public class DrawEngine : DrawableGameComponent
         var tex = Game.Content.Load<Texture2D>("Graphics/monochrome-transparent_packed");
         var font = Game.Content.Load<SpriteFont>("Fonts/Kenney Mini");
         
-        var coinLoc = new IntVector2(35, 16);
-        spriteBatch.Draw(tex, new Vector2(topBarPadding, topBarPadding), new Rectangle(coinLoc * _tileSize, _tileSize), Color.Gold);
+        var dollaLoc = new IntVector2(35, 16);
+        spriteBatch.Draw(tex, new Vector2(topBarPadding, topBarPadding), new Rectangle(dollaLoc * _tileSize, _tileSize), Color.Gold);
         var moneyFieldEnd = topBarPadding + _tileSize.X + labelSpacing + font.MeasureString($"{player.Money}").X;
         spriteBatch.DrawString(font, $"{player.Money}", new Vector2(topBarPadding + _tileSize.X + labelSpacing, topBarPadding), Color.Gold);
-        
-        
-        
+
         var stairsLoc = new IntVector2(2, 6);
         spriteBatch.Draw(tex, new Vector2(moneyFieldEnd + elementSpacing, topBarPadding), new Rectangle(stairsLoc * _tileSize, _tileSize), Color.Gold);
+        var levelFieldEnd = moneyFieldEnd + elementSpacing + _tileSize.X + labelSpacing + font.MeasureString($"{player.Location.Z}").X;
         spriteBatch.DrawString(font, $"{player.Location.Z}", new Vector2(moneyFieldEnd + elementSpacing + _tileSize.X + labelSpacing, topBarPadding), Color.Gold);
 
+        var heartLoc = new IntVector2(39, 10);
+        spriteBatch.Draw(tex, new Vector2(levelFieldEnd + elementSpacing, topBarPadding), new Rectangle(heartLoc * _tileSize, _tileSize), Color.Gold);
+        spriteBatch.DrawString(font, $"{player.Hp}", new Vector2(levelFieldEnd + elementSpacing + _tileSize.X + labelSpacing, topBarPadding), Color.Gold);
 
     }
     
