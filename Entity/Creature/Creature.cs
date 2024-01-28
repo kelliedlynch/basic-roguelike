@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.Xna.Framework;
+using Roguelike.Map;
 
 namespace Roguelike.Entity.Creature;
 
 public class Creature : Entity
 {
-
+    public bool Ready = false;
     
     public Pathfinder Pathfinder = new ();
     public event EventHandler CreatureWasDestroyed;
@@ -35,8 +37,10 @@ public class Creature : Entity
 
     public bool CanSeeEntity(TileMap map, Entity entity)
     {
+        Pathfinder.CreaturesBlockPath = false;
         var path = Pathfinder.FindPath(map, Location.To2D, entity.Location.To2D);
-        return (path.Count < 10);
+        Pathfinder.CreaturesBlockPath = true;
+        return (path is not null && path.Count < 10);
     }
 
 }

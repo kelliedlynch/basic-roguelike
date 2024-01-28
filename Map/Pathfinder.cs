@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
-using Roguelike.Map;
 
 
 // Based on A* Implementation by Dave Cusatis https://github.com/davecusatis/A-Star-Sharp
 
-namespace Roguelike;
+namespace Roguelike.Map;
 
 public class Pathfinder
 {
     // private readonly TileMap _tileMap;
+    public DirectionType MoveType = DirectionType.Octilinear;
+    public bool CreaturesBlockPath = true;
 
     private Dictionary<TileType, bool> _tilePassable = new();
 
@@ -36,7 +37,7 @@ public class Pathfinder
     {
         _tilePassable[type] = passable;
     }
-    
+
     public Stack<DungeonTile> FindPath(TileMap tileMap, IntVector2 start, IntVector2 end)
     {
         var startTile = tileMap.GetTileAt(start);
@@ -46,6 +47,17 @@ public class Pathfinder
         var path = new Stack<DungeonTile>();
         var openList = new PriorityQueue<DungeonTile,float>();
         var closedList = new List<DungeonTile>();
+        // if (CreaturesBlockMovement)
+        // {
+        //     foreach (var c in tileMap.Creatures)
+        //     {
+        //         foreach (var creature in c)
+        //         {
+        //             closedList.Add(tileMap.GetTileAt(creature.Location.To2D));
+        //         }
+        //     }
+        // }
+        
         List<DungeonTile> adjacencies;
         DungeonTile current = startTile;
        
@@ -56,11 +68,13 @@ public class Pathfinder
         {
             current = openList.Dequeue();
             closedList.Add(current);
-            adjacencies = tileMap.GetAdjacentTiles(current);
+            adjacencies = tileMap.GetAdjacentTiles(current, MoveType);
 
             foreach(DungeonTile adj in adjacencies)
             {
-                if (!closedList.Contains(adj) && _tilePassable[adj.Type])
+                if (!closedList.Contains(adj) 
+                    && _tilePassable[adj.Type]
+                    )
                 {
                     bool isFound = false;
                     foreach (var oLNode in openList.UnorderedItems)
@@ -72,6 +86,7 @@ public class Pathfinder
                     }
                     if (!isFound)
                     {
+                        if (CreaturesBlockPath && tileMap.Creatures[adj.X, adj.Y].Count > 0 && adj != endTile) continue;
                         adj.Parent = current;
                         adj.DistanceToTarget = Math.Abs(adj.X - end.X) + Math.Abs(adj.Y - end.Y);
                         adj.Cost = _tileWeights[adj.Type] + adj.Parent.Cost;
@@ -97,6 +112,12 @@ public class Pathfinder
         } while (temp != null && (temp.X != startTile.X || temp.Y != startTile.Y)) ;
         return path;
     }
-    
+}
 
+public enum DirectionType
+{
+    None = 0,
+    Orthogonal = 1,
+    Diagonal = 2,
+    Octilinear = Orthogonal | Diagonal,
 }

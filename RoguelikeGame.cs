@@ -94,6 +94,7 @@ public class RoguelikeGame : Game
 
     private void BeginGame()
     {
+        ActivityLog.InitializeLog();
         PlayerManager.InitializePlayer();
         MapManager.InitializeMaps();
         EnemyManager.InitializeEnemies();

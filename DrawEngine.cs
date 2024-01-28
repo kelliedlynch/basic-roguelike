@@ -180,7 +180,7 @@ public class DrawEngine : DrawableGameComponent
 
         var log = Game.Services.GetService<ActivityLog>();
         log.Size = new IntVector2(48, 4);
-        log.Location = new IntVector2(0, 62);
+        log.Location = new IntVector2(0, 64);
         // if (log.Messages.Count > 0) box.Text = log.Messages[^1];
         log.DrawBox(spriteBatch);
         // box.(spriteBatch);

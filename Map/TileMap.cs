@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
-using Roguelike.Entity;
+using Roguelike.Entity.Creature;
 using Roguelike.Entity.Feature;
-using Roguelike.Map;
 
-namespace Roguelike;
+namespace Roguelike.Map;
 
 public class TileMap
 {
@@ -13,6 +12,7 @@ public class TileMap
     public readonly int Height;
     public readonly DungeonTile[,] Tiles;
     public readonly List<Feature>[,] Features;
+    public readonly List<Creature>[,] Creatures;
     public StairsDown StairsDown;
     public StairsUp StairsUp;
     // public IntVector2 EntryPoint;
@@ -25,6 +25,7 @@ public class TileMap
         Height = height;
         Tiles = new DungeonTile[Width, Height];
         Features = new List<Feature>[Width, Height];
+        Creatures = new List<Creature>[Width, Height];
         
         for (var i = 0; i < width; i++)
         {
@@ -32,18 +33,19 @@ public class TileMap
             {
                 Tiles[i, j] = new DungeonTile(i, j, level);
                 Features[i, j] = new List<Feature>();
+                Creatures[i, j] = new List<Creature>();
             }
         }
     }
     
     [UsedImplicitly]
-    public List<DungeonTile> GetAdjacentTiles(DungeonTile tile, int adjacencyType = 0)
+    public List<DungeonTile> GetAdjacentTiles(DungeonTile tile, DirectionType adjacencyType = DirectionType.Octilinear)
     {
         return GetAdjacentTiles(new IntVector2(tile.X, tile.Y), adjacencyType);
     }
 
     [UsedImplicitly]
-    public List<DungeonTile> GetAdjacentTiles(IntVector2 location, int adjacencyType = 0)
+    public List<DungeonTile> GetAdjacentTiles(IntVector2 location, DirectionType adjacencyType = DirectionType.Octilinear)
     {
         // adjacencyType: 0 orthogonal, 1 diagonal, 2 both
         
@@ -52,7 +54,7 @@ public class TileMap
         var row = location.Y;
         var col = location.X;
 
-        if (adjacencyType is 0 or 2)
+        if (adjacencyType is DirectionType.Orthogonal or DirectionType.Octilinear)
         {
             if(row + 1 < Height)
             {
@@ -72,7 +74,7 @@ public class TileMap
             }
         }
 
-        if (adjacencyType is 1 or 2)
+        if (adjacencyType is DirectionType.Diagonal or DirectionType.Octilinear)
         {
             if (row + 1 < Height && col + 1 < Width)
             {
@@ -94,9 +96,10 @@ public class TileMap
         }
 
 
-        return temp;    }
+        return temp;    
+    }
 
-    public DungeonTile RandomAdjacentTile(IntVector2 pos, int adjacencyType = 0)
+    public DungeonTile RandomAdjacentTile(IntVector2 pos, DirectionType adjacencyType = DirectionType.Octilinear)
     {
         var index = _random.Next(7);
         var tiles = GetAdjacentTiles(pos, adjacencyType);

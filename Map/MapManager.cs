@@ -35,7 +35,8 @@ public class MapManager : RoguelikeGameManager
         _dungeonLevelIndex = 0;
         AddDungeonLevel(1);
        
-        Player.Location = _maps[^1].RandomAdjacentTile(_maps[^1].StairsUp.Location.To2D, 2).Location;
+        Player.Location = _maps[^1].RandomAdjacentTile(_maps[^1].StairsUp.Location.To2D).Location;
+        _maps[^1].Creatures[Player.Location.X, Player.Location.Y].Add(Player);
     }
 
     private void AddDungeonLevel(int level)
@@ -99,7 +100,7 @@ public class MapManager : RoguelikeGameManager
             // portal.LinkedPortal = _maps[^1].StairsUp;
             CurrentDungeonLevel++;
         }
-        MovePlayerToLevel(CurrentDungeonLevel, CurrentMap.RandomAdjacentTile(portal.LinkedPortal!.Location.To2D, 2).Location.To2D);
+        MovePlayerToLevel(CurrentDungeonLevel, CurrentMap.RandomAdjacentTile(portal.LinkedPortal!.Location.To2D).Location.To2D);
         EnemyManager.PopulateLevel(CurrentDungeonLevel);
     }
 

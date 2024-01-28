@@ -9,7 +9,7 @@ namespace Roguelike;
 public class MapGenerator
 {
     private readonly Random _random = new();
-    private readonly IntVector2 _mapSize = new IntVector2(50, 68);
+    private readonly IntVector2 _mapSize = new IntVector2(50, 62);
     private readonly IntVector2 _maxRoomRegionSize = new(14, 18);
     private readonly IntVector2 _minRoomSize = new(3, 3);
     
@@ -109,6 +109,7 @@ public class MapGenerator
         var tunnelingPathfinder = new Pathfinder();
         tunnelingPathfinder.SetTilePassable(TileType.Wall, true);
         tunnelingPathfinder.SetTilePassable(TileType.Void, true);
+        tunnelingPathfinder.MoveType = DirectionType.Orthogonal;
         IntVector2 FindUnreachableRoom(IntVector2 origin)
         {
             foreach (var center in roomCenters)
@@ -169,7 +170,7 @@ public class MapGenerator
     {
         return false;
     }
-    var adj = map.GetAdjacentTiles(tile.Location.To2D, 2);
+    var adj = map.GetAdjacentTiles(tile.Location.To2D);
     return adj.TrueForAll(x => x.Type == TileType.Floor);
     }
 
@@ -230,7 +231,7 @@ public class MapGenerator
     {
         foreach (var tile in map.Tiles)
         {
-            foreach (var adjTile in map.GetAdjacentTiles(tile, 2))
+            foreach (var adjTile in map.GetAdjacentTiles(tile))
             {
                 if (tile.Type == TileType.Floor && adjTile.Type == TileType.Void)
                 {

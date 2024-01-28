@@ -90,6 +90,7 @@ public class EnemyManager : RoguelikeGameManager
         }
         
         _enemies[enemy.Location.Z - 1].Add(enemy);
+        MapManager.CurrentMap.Creatures[enemy.Location.X, enemy.Location.Y].Add(enemy);
         enemy.OnLogEvent += ActivityLog.LogEvent;
         enemy.CreatureWasDestroyed += RemoveEnemyFromWorld;
     }
@@ -99,6 +100,7 @@ public class EnemyManager : RoguelikeGameManager
         var enemy = (Creature)sender;
         var a = (DestroyEventArgs)args;
         _enemies[enemy.Location.Z - 1].Remove(enemy);
+        MapManager.CurrentMap.Creatures[enemy.Location.X, enemy.Location.Y].Remove(enemy);
         foreach (var item in a.ItemsDropped)
         {
             item.Location = enemy.Location;
@@ -106,33 +108,48 @@ public class EnemyManager : RoguelikeGameManager
         }
     }
 
-    public void QueueEnemyAttacks()
+    public void ProcessEnemyAttacks()
     {
         foreach (var enemy in EnemiesOnLevel(MapManager.CurrentDungeonLevel))
         {
-            var adjacent = MapManager.CurrentMap.GetAdjacentTiles(enemy.Location.To2D, 2);
+            if (!enemy.Ready) continue;
+            var adjacent = MapManager.CurrentMap.GetAdjacentTiles(enemy.Location.To2D);
             foreach (var a in adjacent)
             {
                 if (a.Location != Player.Location) continue;
-                var args = new AttackEventArgs(enemy, Player);
-                TurnManager.QueueAttack(args);
+                enemy.AttackEntity(Player);
+                enemy.Ready = false;
                 break;
             }
 
         }
     }
 
-    public void QueueEnemyMoves()
+    public void ProcessEnemyMoves()
     {
         foreach (var enemy in EnemiesOnLevel(MapManager.CurrentDungeonLevel))
         {
+            if (!enemy.Ready) continue;
             if (enemy.CanSeeEntity(MapManager.CurrentMap, Player))
             {
                 var path = enemy.Pathfinder.FindPath(MapManager.CurrentMap, enemy.Location.To2D, Player.Location.To2D);
                 if (path.Count <= 1) continue;
                 var tile = path.Pop();
-                var args = new MoveEventArgs(enemy, enemy.Location.To2D, tile.Location.To2D);
-                TurnManager.QueueMove(args);
+                MapManager.CurrentMap.Creatures[enemy.Location.X, enemy.Location.Y].Remove(enemy);
+                enemy.Location = tile.Location;
+                MapManager.CurrentMap.Creatures[enemy.Location.X, enemy.Location.Y].Add(enemy);
+                enemy.Ready = false;
+            }
+        }
+    }
+
+    public void EndTurn()
+    {
+        foreach (List<Creature> e in _enemies)
+        {
+            foreach (Creature enemy in e)
+            {
+                enemy.Ready = true;
             }
         }
     }
@@ -146,6 +163,7 @@ public class EnemyManager : RoguelikeGameManager
     {
         var attempts = 200;
         var pathfinder = new Pathfinder();
+        pathfinder.CreaturesBlockPath = false;
         var i = 0;
         do
         {

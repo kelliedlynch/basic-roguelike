@@ -49,30 +49,42 @@ public class TurnManager : RoguelikeGameManager
         {
             case TurnPhase.PlayerMove:
             {
+                // TODO: A queue is probably not needed here.
+                
                 while (_moveQueue.Count > 0)
                 {
                     var move = _moveQueue.Dequeue();
+                    MapManager.CurrentMap.Creatures[Player.Location.X, Player.Location.Y].Remove(Player);
                     move.Entity.Location = move.ToLocation;
+                    MapManager.CurrentMap.Creatures[Player.Location.X, Player.Location.Y].Add(Player);
                 }
           
                 _phase = _phase.Next();
                 break;
             }
-            case TurnPhase.Attack:
+            case TurnPhase.PlayerAttack:
             {
-                // currently we need to loop twice because if an enemy is destroyed, its attack is not removed from the queue
-                // TODO: change that
+                // TODO: Again, we probably don't need a queue for player actions
                 while (_attackQueue.Count > 0)
                 {
                     var attack = _attackQueue.Dequeue();
                     attack.Attacker.AttackEntity(attack.Defender);
                 }
-                EnemyManager.QueueEnemyAttacks();
-                while (_attackQueue.Count > 0)
-                {
-                    var attack = _attackQueue.Dequeue();
-                    attack.Attacker.AttackEntity(attack.Defender);
-                }
+
+                _phase = _phase.Next();
+                break;
+            }
+            case TurnPhase.EnemyMove:
+            {
+                EnemyManager.ProcessEnemyMoves();
+
+                _phase = _phase.Next();
+                break;
+            }
+            case TurnPhase.EnemyAttack:
+            {
+                EnemyManager.ProcessEnemyAttacks();
+
                 _phase = _phase.Next();
                 break;
             }
@@ -104,21 +116,15 @@ public class TurnManager : RoguelikeGameManager
                 _phase = _phase.Next();
                 break;
             }
-            case TurnPhase.EnemyMove:
-            {
-                EnemyManager.QueueEnemyMoves();
-                while (_moveQueue.Count > 0)
-                {
-                    var move = _moveQueue.Dequeue();
-                    move.Entity.Location = move.ToLocation;
-                }
-
-                _phase = _phase.Next();
-                break;
-            }
             case TurnPhase.Spawn:
             {
                 EnemyManager.RunSpawnCycle();
+                _phase = _phase.Next();
+                break;
+            }
+            case TurnPhase.EndTurn:
+            {
+                EnemyManager.EndTurn();
                 _phase = _phase.Next();
                 break;
             }
@@ -145,9 +151,11 @@ public enum TurnPhase
 {
     Wait,
     PlayerMove,
-    Attack,
+    PlayerAttack,
+    EnemyMove,
+    EnemyAttack,
     PreAction,
     Action,
-    EnemyMove,
-    Spawn
+    Spawn,
+    EndTurn
 }
