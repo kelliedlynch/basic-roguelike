@@ -40,9 +40,9 @@ public class Player : Creature.Creature
         }
     }
 
-    public bool CanMoveToTile(TileMap map, DungeonTile tile)
+    public bool CanMoveToTile(DungeonLevel level, DungeonTile tile)
     {
-        var path = Pathfinder.FindPath(map, Location.To2D, tile.Location.To2D);
+        var path = Pathfinder.FindPath(level, Location.To2D, tile.Location.To2D);
         if (path is not null && path.Count > 0)
         {
             return true;

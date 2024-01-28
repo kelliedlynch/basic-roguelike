@@ -54,9 +54,7 @@ public class TurnManager : RoguelikeGameManager
                 while (_moveQueue.Count > 0)
                 {
                     var move = _moveQueue.Dequeue();
-                    MapManager.CurrentMap.Creatures[Player.Location.X, Player.Location.Y].Remove(Player);
-                    move.Entity.Location = move.ToLocation;
-                    MapManager.CurrentMap.Creatures[Player.Location.X, Player.Location.Y].Add(Player);
+                    LevelManager.MoveEntity(Player, move.ToLocation);
                 }
           
                 _phase = _phase.Next();
@@ -90,10 +88,10 @@ public class TurnManager : RoguelikeGameManager
             }
             case TurnPhase.PreAction:
             {
-                var entities = EntityManager.EntitiesOnLevel(MapManager.CurrentDungeonLevel);
-                for (var index = entities.Count - 1; index >= 0; index--)
+                var pickups = LevelManager.CurrentLevel.MoneyAt(Player.Location.X, Player.Location.Y);
+                for (var index = pickups.Count - 1; index >= 0; index--)
                 {
-                    var entity = entities[index];
+                    var entity = pickups[index];
                     if (entity.Location == Player.Location)
                     {
                         Player.PickUp(entity);
@@ -104,14 +102,11 @@ public class TurnManager : RoguelikeGameManager
             }
             case TurnPhase.Action:
             {
-                var features = MapManager.CurrentMap.Features[Player.Location.X, Player.Location.Y];
-                foreach (var feature in features)
+                var portals = LevelManager.CurrentLevel.PortalsAt(Player.Location.X, Player.Location.Y);
+                foreach (var portal in portals)
                 {
-                    if (feature is Portal portal)
-                    {
-                        MapManager.UsePortal(portal);
-                        break;
-                    }
+                    LevelManager.UsePortal(portal);
+                    break;
                 }
                 _phase = _phase.Next();
                 break;

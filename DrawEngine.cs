@@ -148,8 +148,8 @@ public class DrawEngine : DrawableGameComponent
     
     public override void Draw(GameTime gameTime)
     {
-        var man = Game.Services.GetService<MapManager>();
-        var map = man.CurrentMap;
+        var levelManager = Game.Services.GetService<LevelManager>();
+        var map = levelManager.CurrentMap;
         var spriteBatch = new SpriteBatch(Game.GraphicsDevice);
         spriteBatch.Begin();
         
@@ -157,8 +157,8 @@ public class DrawEngine : DrawableGameComponent
 
         DrawFeatures(map, spriteBatch);
 
-        var ent = Game.Services.GetService<EntityManager>().EntitiesOnLevel(man.CurrentDungeonLevel);
-        foreach (var entity in ent)
+        // var ent = Game.Services.GetService<EntityManager>().EntitiesOnLevel(levelManager.CurrentLevelNumber);
+        foreach (var entity in levelManager.CurrentLevel.EntitiesOnLevel())
         {
             DrawSpriteAtLocation(entity, entity.Location.To2D, spriteBatch);
         }
@@ -168,11 +168,11 @@ public class DrawEngine : DrawableGameComponent
         DrawSpriteAtLocation(player, player.Location.To2D, spriteBatch);
         
         // Draw Enemies
-        var eman = Game.Services.GetService<EnemyManager>();
-        foreach (var enemy in eman.EnemiesOnLevel(man.CurrentDungeonLevel))
-        {
-            DrawSpriteAtLocation(enemy, enemy.Location.To2D, spriteBatch);
-        }
+        // var eman = Game.Services.GetService<EnemyManager>();
+        // foreach (var enemy in eman.EnemiesOnLevel(levelManager.CurrentLevelNumber))
+        // {
+        //     DrawSpriteAtLocation(enemy, enemy.Location.To2D, spriteBatch);
+        // }
 
         DrawTopBar(spriteBatch, player);
         

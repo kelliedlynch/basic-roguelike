@@ -47,7 +47,7 @@ public class Entity : SpriteRepresented
     // }
 
     // public event EventHandler EntityWasCreated;
-    public event EventHandler EntityWasDestroyed;
+    public event DestroyEventHandler EntityWasDestroyed;
     // public event EventHandler EntityMoved;
 
     // protected virtual void InvokeEntityMoved(IntVector3 from, IntVector3 to)
@@ -83,8 +83,13 @@ public class Entity : SpriteRepresented
     
     public virtual void Destroy()
     {
-        EntityWasDestroyed?.Invoke(this, new DestroyEventArgs(this));
+        InvokeEntityWasDestroyed(new DestroyEventArgs(this));
         LogEvent($"{Name} was destroyed");
+    }
+
+    public void InvokeEntityWasDestroyed(DestroyEventArgs args)
+    {
+        EntityWasDestroyed?.Invoke(this, args);
     }
 
 
@@ -93,16 +98,19 @@ public class Entity : SpriteRepresented
 public class DestroyEventArgs : EventArgs
 {
     public Entity Entity;
+    public IntVector3 DestroyLocation;
     public List<Entity> ItemsDropped = new();
 
     public DestroyEventArgs(Entity e)
     {
         Entity = e;
+        DestroyLocation = e.Location;
     }
     
     public DestroyEventArgs(Entity e, List<Entity> items)
     {
         Entity = e;
+        DestroyLocation = e.Location;
         ItemsDropped.AddRange(items);
     }
 }
@@ -137,3 +145,5 @@ public class MoveEventArgs : EventArgs
         ToLocation = to;
     }
 }
+
+public delegate void DestroyEventHandler (Entity sender, DestroyEventArgs args);

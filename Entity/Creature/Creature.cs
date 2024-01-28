@@ -11,7 +11,7 @@ public class Creature : Entity
     public bool Ready = false;
     
     public Pathfinder Pathfinder = new ();
-    public event EventHandler CreatureWasDestroyed;
+    public event EventHandler<DestroyEventArgs> CreatureWasDestroyed;
     public Creature()
     {
         SpriteLocation = new IntVector2(25, 2);
@@ -23,7 +23,8 @@ public class Creature : Entity
     {
         var coin = new Money(1);
         var args = new DestroyEventArgs(this, new List<Entity>() { coin });
-        CreatureWasDestroyed?.Invoke(this, args);
+        InvokeEntityWasDestroyed(args);
+        // EntityWasDestroyed?.Invoke(this, args);
     }
     
     public virtual void AttackEntity(Entity entity)
@@ -32,13 +33,13 @@ public class Creature : Entity
         entity.TakeDamage(damage);
         var args = new ActivityLogEventArgs($"{Name} hit {entity.Name} for {damage} damage");
         LogEvent(args);
-        // entity.Destroy();
     }
 
-    public bool CanSeeEntity(TileMap map, Entity entity)
+    public bool CanSeeEntity(DungeonLevel level, Entity entity)
     {
+        // TODO: this probably belongs in a manager
         Pathfinder.CreaturesBlockPath = false;
-        var path = Pathfinder.FindPath(map, Location.To2D, entity.Location.To2D);
+        var path = Pathfinder.FindPath(level, Location.To2D, entity.Location.To2D);
         Pathfinder.CreaturesBlockPath = true;
         return (path is not null && path.Count < 10);
     }

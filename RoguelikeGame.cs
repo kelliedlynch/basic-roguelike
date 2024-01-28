@@ -14,11 +14,10 @@ public class RoguelikeGame : Game
     public DrawEngine DrawEngine;
     public EnemyManager EnemyManager;
     public PlayerManager PlayerManager;
-    public MapManager MapManager;
     public InputManager InputManager;
-    public EntityManager EntityManager;
     public TurnManager TurnManager;
     public ActivityLog ActivityLog;
+    public LevelManager LevelManager;
 
     public event EventHandler ConnectManagers;
     // public event EventHandler BeginGame;
@@ -51,17 +50,17 @@ public class RoguelikeGame : Game
         Components.Add(PlayerManager);
         Services.AddService(typeof(PlayerManager), PlayerManager);
 
-        MapManager = new MapManager(this);
-        Components.Add(MapManager);
-        Services.AddService(typeof(MapManager), MapManager);
+        // MapManager = new MapManager(this);
+        // Components.Add(MapManager);
+        // Services.AddService(typeof(MapManager), MapManager);
         
         EnemyManager = new EnemyManager(this);
         Components.Add(EnemyManager);
         Services.AddService(typeof(EnemyManager), EnemyManager);
-        
-        EntityManager = new EntityManager(this);
-        Components.Add(EntityManager);
-        Services.AddService(typeof(EntityManager), EntityManager);
+
+        LevelManager = new LevelManager(this);
+        Components.Add(LevelManager);
+        Services.AddService(typeof(LevelManager), LevelManager);
 
         InputManager = new InputManager(this);
         Components.Add(InputManager);
@@ -96,7 +95,7 @@ public class RoguelikeGame : Game
     {
         ActivityLog.InitializeLog();
         PlayerManager.InitializePlayer();
-        MapManager.InitializeMaps();
+        LevelManager.InitializeLevels();
         EnemyManager.InitializeEnemies();
     }
 

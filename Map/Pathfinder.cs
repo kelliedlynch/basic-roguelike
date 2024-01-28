@@ -38,10 +38,10 @@ public class Pathfinder
         _tilePassable[type] = passable;
     }
 
-    public Stack<DungeonTile> FindPath(TileMap tileMap, IntVector2 start, IntVector2 end)
+    public Stack<DungeonTile> FindPath(DungeonLevel level, IntVector2 start, IntVector2 end)
     {
-        var startTile = tileMap.GetTileAt(start);
-        var endTile = tileMap.GetTileAt(end);
+        var startTile = level.Map.GetTileAt(start);
+        var endTile = level.Map.GetTileAt(end);
         
 
         var path = new Stack<DungeonTile>();
@@ -68,7 +68,7 @@ public class Pathfinder
         {
             current = openList.Dequeue();
             closedList.Add(current);
-            adjacencies = tileMap.GetAdjacentTiles(current, MoveType);
+            adjacencies = level.Map.GetAdjacentTiles(current, MoveType);
 
             foreach(DungeonTile adj in adjacencies)
             {
@@ -86,7 +86,7 @@ public class Pathfinder
                     }
                     if (!isFound)
                     {
-                        if (CreaturesBlockPath && tileMap.Creatures[adj.X, adj.Y].Count > 0 && adj != endTile) continue;
+                        if (CreaturesBlockPath && level.CreaturesAt(adj.X, adj.Y).Count > 0 && adj != endTile) continue;
                         adj.Parent = current;
                         adj.DistanceToTarget = Math.Abs(adj.X - end.X) + Math.Abs(adj.Y - end.Y);
                         adj.Cost = _tileWeights[adj.Type] + adj.Parent.Cost;

@@ -11,11 +11,11 @@ public class RoguelikeGameManager : GameComponent
     public DrawEngine DrawEngine;
     public EnemyManager EnemyManager;
     public PlayerManager PlayerManager;
-    public MapManager MapManager;
+    // public MapManager MapManager;
     public InputManager InputManager;
-    public EntityManager EntityManager;
     public TurnManager TurnManager;
     public ActivityLog ActivityLog;
+    public LevelManager LevelManager;
     public Player Player => Game.Services.GetService<PlayerManager>().Player;
     
     public RoguelikeGameManager(RoguelikeGame game) : base(game)
@@ -30,11 +30,11 @@ public class RoguelikeGameManager : GameComponent
         DrawEngine = Game.Services.GetService<DrawEngine>();
         EnemyManager = Game.Services.GetService<EnemyManager>();
         PlayerManager = Game.Services.GetService<PlayerManager>();
-        MapManager = Game.Services.GetService<MapManager>();
+        // MapManager = Game.Services.GetService<MapManager>();
         InputManager = Game.Services.GetService<InputManager>();
-        EntityManager = Game.Services.GetService<EntityManager>();
         TurnManager = Game.Services.GetService<TurnManager>();
         ActivityLog = Game.Services.GetService<ActivityLog>();
+        LevelManager = Game.Services.GetService<LevelManager>();
     }
     
     protected virtual void OnBeginGame(object sender, EventArgs e)

@@ -17,6 +17,8 @@ public class MapGenerator
     public TileMap GenerateDungeonMap(int dungeonLevel)
     {
         var map = new TileMap(_mapSize.X, _mapSize.Y, dungeonLevel);
+        // TODO: this is temporarily generating a level just for pahtfinding purposes, fix that
+        var level = new DungeonLevel(map);
         
         // Divide grid into regions that could contain rooms
         var currentOrigin = new IntVector2(0, 0);
@@ -114,7 +116,7 @@ public class MapGenerator
         {
             foreach (var center in roomCenters)
             {
-                var walkingPath = walkingPathfinder.FindPath(map, origin, center);
+                var walkingPath = walkingPathfinder.FindPath(level, origin, center);
                 if (walkingPath == null)
                 {
                     return center;
@@ -134,7 +136,7 @@ public class MapGenerator
                 break;
             }
 
-            var path = tunnelingPathfinder.FindPath(map, origin, unreachable);
+            var path = tunnelingPathfinder.FindPath(level, origin, unreachable);
             // TODO: HANDLE WHEN PATH IS NOT FOUND
             foreach (var tile in path)
             {
@@ -144,8 +146,8 @@ public class MapGenerator
         PutUpWalls(map);
         
         // Place stairs
-        PlaceStairsUp(map, dungeonLevel);
-        PlaceStairsDown(map, dungeonLevel);
+        PlaceStairsUp(level);
+        PlaceStairsDown(level);
 
         // SetDefaultEntryPoint(map);
 
@@ -174,53 +176,53 @@ public class MapGenerator
     return adj.TrueForAll(x => x.Type == TileType.Floor);
     }
 
-    private void PlaceStairsUp(TileMap map, int dungeonLevel)
+    private void PlaceStairsUp(DungeonLevel level)
     {
         var attempts = 0;
         do
         {
-            var w = _random.Next(3, map.Width - 3);
-            var h = _random.Next(3, map.Height - 3);
-            var tile = map.GetTileAt(new IntVector2(w, h));
-                if (!IsValidStairsLocation(map, tile))
+            var w = _random.Next(3, level.Map.Width - 3);
+            var h = _random.Next(3, level.Map.Height - 3);
+            var tile = level.Map.GetTileAt(new IntVector2(w, h));
+                if (!IsValidStairsLocation(level.Map, tile))
                 {
                     attempts++;
                     continue;
                 }
 
-                map.StairsUp = new StairsUp(tile.X, tile.Y, dungeonLevel);
-                map.Features[tile.X, tile.Y].Add(map.StairsUp);
+                level.Map.StairsUp = new StairsUp(tile.X, tile.Y, level.LevelNumber);
+                level.Map.Features[tile.X, tile.Y].Add(level.Map.StairsUp);
                 return;
         } while (attempts < 200);
 
         throw new ValidLocationNotFoundException("Could not place stairs up");
     }
     
-    private void PlaceStairsDown(TileMap map, int dungeonLevel)
+    private void PlaceStairsDown(DungeonLevel level)
     {
         var attempts = 0;
         do
         {
-            var w = _random.Next(3, map.Width - 3);
-            var h = _random.Next(3, map.Height - 3);
-            var tile = map.GetTileAt(new IntVector2(w, h));
-            if (!IsValidStairsLocation(map, tile))
+            var w = _random.Next(3, level.Map.Width - 3);
+            var h = _random.Next(3, level.Map.Height - 3);
+            var tile = level.Map.GetTileAt(new IntVector2(w, h));
+            if (!IsValidStairsLocation(level.Map, tile))
             {
                 attempts++;
                 continue;
             }
             var pf = new Pathfinder();
-            var distance = pf.FindPath(map, tile.Location.To2D, map.StairsUp.Location.To2D);
+            var distance = pf.FindPath(level, tile.Location.To2D, level.Map.StairsUp.Location.To2D);
             if (distance is null) continue;
-            var allowableDistance = (int)(map.Width * .4) + (int)(map.Height * .4);
+            var allowableDistance = (int)(level.Map.Width * .4) + (int)(level.Map.Height * .4);
             if (distance.Count < allowableDistance)
             {
                 attempts++;
                 continue;
             }
             
-            map.StairsDown = new StairsDown(tile.Location);
-            map.Features[tile.Location.X, tile.Location.Y].Add(map.StairsDown);
+            level.Map.StairsDown = new StairsDown(tile.Location);
+            level.Map.Features[tile.Location.X, tile.Location.Y].Add(level.Map.StairsDown);
             return;
 
         } while (attempts < 200);
