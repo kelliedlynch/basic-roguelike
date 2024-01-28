@@ -87,7 +87,7 @@ public class Entity : SpriteRepresented
         LogEvent($"{Name} was destroyed");
     }
 
-    public void InvokeEntityWasDestroyed(DestroyEventArgs args)
+    protected void InvokeEntityWasDestroyed(DestroyEventArgs args)
     {
         EntityWasDestroyed?.Invoke(this, args);
     }

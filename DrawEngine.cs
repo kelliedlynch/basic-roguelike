@@ -184,6 +184,15 @@ public class DrawEngine : DrawableGameComponent
         // if (log.Messages.Count > 0) box.Text = log.Messages[^1];
         log.DrawBox(spriteBatch);
         // box.(spriteBatch);
+
+
+        if (Game.Services.GetService<InputManager>().GameState == InputState.GameOver)
+        {
+            var gameOverMsg = new DialogBox(Game);
+            gameOverMsg.Text = "Game Over";
+            gameOverMsg.DrawBox(spriteBatch);
+        }
+        
         
         spriteBatch.End();
     }

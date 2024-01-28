@@ -40,6 +40,11 @@ public class Player : Creature.Creature
         }
     }
 
+    // public override void Destroy()
+    // {
+    //    InvokeEntityWasDestroyed(new DestroyEventArgs(this));
+    // }
+
     public bool CanMoveToTile(DungeonLevel level, DungeonTile tile)
     {
         var path = Pathfinder.FindPath(level, Location.To2D, tile.Location.To2D);

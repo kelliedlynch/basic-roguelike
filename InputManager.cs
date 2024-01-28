@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
@@ -5,21 +6,34 @@ namespace Roguelike;
 
 public class InputManager : RoguelikeGameManager
 {
+    public InputState GameState = InputState.GameOver;
     private bool _keyIsPressed;
     private double _keyDownTime;
     private const double FastMoveDelay = .4;
     private double _fastMoveTimer;
     private const double FastMoveInterval = .15;
 
+    public event EventHandler BeginNewGame;
+
     public InputManager(RoguelikeGame game) : base(game)
     {
 
     }
-    
-    
+
     public override void Update(GameTime gameTime)
     {
+
         var keyboard = Keyboard.GetState();
+        if (GameState == InputState.GameOver)
+        {
+            if (keyboard.IsKeyDown(Keys.Space))
+            {
+                BeginNewGame?.Invoke(this, EventArgs.Empty);
+            }
+
+            return;
+        }
+        
         if (!_keyIsPressed || (_keyIsPressed && _keyDownTime > FastMoveDelay) || _fastMoveTimer > FastMoveInterval)
         {
             if (keyboard.GetPressedKeys().Length == 0)
@@ -104,3 +118,8 @@ public struct Direction
     public static IntVector2 Right { get; } = new(1, 0);
 }
 
+public enum InputState
+{
+    GameRunning,
+    GameOver
+}

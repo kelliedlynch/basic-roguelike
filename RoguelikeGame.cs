@@ -20,6 +20,8 @@ public class RoguelikeGame : Game
     public LevelManager LevelManager;
 
     public event EventHandler ConnectManagers;
+
+    public event EventHandler EndGame;
     // public event EventHandler BeginGame;
 
 
@@ -87,8 +89,16 @@ public class RoguelikeGame : Game
     protected override void BeginRun()
     {
         BeginGame();
+        // EndGame += OnEndGame;
+        InputManager.BeginNewGame += OnBeginGameRequested;
+        InputManager.GameState = InputState.GameRunning;
         
         base.BeginRun();
+    }
+
+    public void OnBeginGameRequested(object sender, EventArgs args)
+    {
+        BeginGame();
     }
 
     private void BeginGame()
@@ -97,6 +107,15 @@ public class RoguelikeGame : Game
         PlayerManager.InitializePlayer();
         LevelManager.InitializeLevels();
         EnemyManager.InitializeEnemies();
+        PlayerManager.Player.EntityWasDestroyed += OnEndGame;
+        InputManager.GameState = InputState.GameRunning;
+    }
+
+    private void OnEndGame(object sender, EventArgs args)
+    {
+        PlayerManager.Player.EntityWasDestroyed -= OnEndGame;
+        InputManager.GameState = InputState.GameOver;
+        
     }
 
     protected override void Update(GameTime gameTime)
@@ -104,12 +123,12 @@ public class RoguelikeGame : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
-        if (Keyboard.GetState().IsKeyDown(Keys.Space))
-        {
-            BeginGame();
-            // EnemyManager.Enemies = new List<Creature>();
-            // PlayerManager.SpawnInPlayer(DrawEngine.TileMap);
-        }
+        // if (Keyboard.GetState().IsKeyDown(Keys.Space))
+        // {
+        //     BeginGame();
+        //     // EnemyManager.Enemies = new List<Creature>();
+        //     // PlayerManager.SpawnInPlayer(DrawEngine.TileMap);
+        // }
 
         base.Update(gameTime);
     }
