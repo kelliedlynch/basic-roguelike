@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Roguelike.Event;
 using Roguelike.Map;
 
 namespace Roguelike.Entity.Creature;
@@ -23,15 +24,14 @@ public class Creature : Entity
         var args = new DestroyEventArgs(this, new List<Entity>() { coin });
         InvokeEntityWasDestroyed(args);
         LogEvent($"{Name} was destroyed");
-        // EntityWasDestroyed?.Invoke(this, args);
     }
     
     public virtual void AttackEntity(Entity entity)
     {
         var damage = Atk - entity.Def;
-        entity.TakeDamage(damage);
         var args = new ActivityLogEventArgs($"{Name} hit {entity.Name} for {damage} damage");
         LogEvent(args);
+        entity.TakeDamage(damage);
     }
 
     public bool CanSeeEntity(DungeonLevel level, Entity entity)

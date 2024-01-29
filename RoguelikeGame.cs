@@ -17,6 +17,7 @@ public class RoguelikeGame : Game
     public LevelManager LevelManager;
 
     public event EventHandler ConnectManagers;
+    public event EventHandler BeginNewGame;
 
     // public event EventHandler EndGame;
     
@@ -74,31 +75,25 @@ public class RoguelikeGame : Game
     {
         BeginGame();
         // EndGame += OnEndGame;
-        InputManager.BeginNewGame += OnBeginGameRequested;
-        InputManager.GameState = InputState.GameRunning;
+        InputManager.GameState = GameRunningState.GameRunning;
         
         base.BeginRun();
     }
 
-    private void OnBeginGameRequested(object sender, EventArgs args)
-    {
-        BeginGame();
-    }
-
-    private void BeginGame()
+    public void BeginGame()
     {
         ActivityLog.InitializeLog();
         PlayerManager.InitializePlayer();
         LevelManager.InitializeLevels();
         EnemyManager.InitializeEnemies();
         PlayerManager.Player.EntityWasDestroyed += OnEndGame;
-        InputManager.GameState = InputState.GameRunning;
+        InputManager.GameState = GameRunningState.GameRunning;
     }
 
     private void OnEndGame(object sender, EventArgs args)
     {
         PlayerManager.Player.EntityWasDestroyed -= OnEndGame;
-        InputManager.GameState = InputState.GameOver;
+        InputManager.GameState = GameRunningState.GameOver;
         
     }
 

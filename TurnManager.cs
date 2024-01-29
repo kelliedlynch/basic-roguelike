@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Roguelike.Entity;
 using Roguelike.Entity.Creature;
+using Roguelike.Event;
 using Roguelike.Utility;
 
 namespace Roguelike;
@@ -14,11 +15,26 @@ public class TurnManager : RoguelikeGameManager
     private readonly Queue<MoveEventArgs> _moveQueue = new();
     private readonly Queue<AttackEventArgs> _attackQueue = new();
 
+    public event EventHandler TurnCompleted;
+    
     public TurnManager(RoguelikeGame game) : base(game)
     {
         
     }
 
+    protected override void AfterConnectManagers()
+    {
+        InputManager.AttemptedMove += OnAttemptedMove;
+        base.AfterConnectManagers();
+    }
+
+    public void OnAttemptedMove(MoveEventArgs args)
+    {
+        Console.WriteLine("attempt move");
+        PlayerManager.AttemptMove(args.ToLocation);
+        ProcessTurn();
+    }
+    
     public void QueueMove(MoveEventArgs move)
     {
         _moveQueue.Enqueue(move);
@@ -57,16 +73,12 @@ public class TurnManager : RoguelikeGameManager
             }
             case TurnPhase.PlayerAttack:
             {
-                Console.WriteLine("Attack phase begin");
                 // TODO: Again, we probably don't need a queue for player actions
                 while (_attackQueue.Count > 0)
                 {
                     var attack = _attackQueue.Dequeue();
-                    Console.WriteLine("attack popped");
                     attack.Attacker.AttackEntity(attack.Defender);
-                    Console.WriteLine("attack performed");
                 }
-                Console.WriteLine("End Attack Phase");
                 _phase = _phase.Next();
                 break;
             }
@@ -119,6 +131,7 @@ public class TurnManager : RoguelikeGameManager
             {
                 EnemyManager.EndTurn();
                 _phase = _phase.Next();
+                TurnCompleted?.Invoke(this, EventArgs.Empty);
                 break;
             }
         }

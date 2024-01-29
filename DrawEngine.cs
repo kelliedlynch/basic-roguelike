@@ -113,7 +113,7 @@ public class DrawEngine : DrawableGameComponent
         log.DrawBox(spriteBatch);
 
 
-        if (Game.Services.GetService<InputManager>().GameState == InputState.GameOver)
+        if (Game.Services.GetService<InputManager>().GameState == GameRunningState.GameOver)
         {
             var gameOverMsg = new DialogBox(Game);
             gameOverMsg.Text = "Game Over";

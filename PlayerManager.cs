@@ -1,5 +1,6 @@
 using System;
 using Roguelike.Entity;
+using Roguelike.Event;
 
 namespace Roguelike;
 
@@ -29,7 +30,6 @@ public class PlayerManager : RoguelikeGameManager
             if (enemy.Location != loc) continue;
             var atk = new AttackEventArgs(Player, enemy);
             TurnManager.QueueAttack(atk);
-            Console.WriteLine("attack queued");
             skipMove = true;
         }
         

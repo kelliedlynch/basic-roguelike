@@ -24,8 +24,7 @@ public class RoguelikeGameManager : GameComponent
 
     protected virtual void OnConnectManagers(object sender, EventArgs e)
     {
-        // This event happens when all the manager classes are loaded. This is where we
-        // subscribe to events from other managers.
+        // This event happens when all the manager classes are loaded. 
         DrawEngine = Game.Services.GetService<DrawEngine>();
         EnemyManager = Game.Services.GetService<EnemyManager>();
         PlayerManager = Game.Services.GetService<PlayerManager>();
@@ -33,6 +32,13 @@ public class RoguelikeGameManager : GameComponent
         TurnManager = Game.Services.GetService<TurnManager>();
         ActivityLog = Game.Services.GetService<ActivityLog>();
         LevelManager = Game.Services.GetService<LevelManager>();
+        
+        AfterConnectManagers();
+    }
+
+    protected virtual void AfterConnectManagers()
+    {
+        
     }
     
     protected virtual void OnBeginGame(object sender, EventArgs e)
