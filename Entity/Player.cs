@@ -26,7 +26,7 @@ public class Player : Creature.Creature
         Color = Color.Aqua;
         Hp = 20;
         Atk = 8;
-        Def = 3;
+        Def = 2;
         Name = "Player";
     }
 
@@ -39,11 +39,6 @@ public class Player : Creature.Creature
             LogEvent($"{Name} picked up {money.Value} gold");
         }
     }
-
-    // public override void Destroy()
-    // {
-    //    InvokeEntityWasDestroyed(new DestroyEventArgs(this));
-    // }
 
     public bool CanMoveToTile(DungeonLevel level, DungeonTile tile)
     {

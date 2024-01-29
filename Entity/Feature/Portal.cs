@@ -5,7 +5,7 @@ namespace Roguelike.Entity.Feature;
 public class Portal : Feature
 {
     public Portal LinkedPortal;
-    public int DungeonLevel;
+    public int DungeonLevel => Location.Z;
 }
 
 public class StairsUp : Portal

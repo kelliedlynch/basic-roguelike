@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using Roguelike.Entity;
 using Roguelike.Entity.Creature;
 using Roguelike.Map;
 
@@ -9,28 +7,26 @@ namespace Roguelike;
 
 public class EnemyManager : RoguelikeGameManager
 {
-    // private List<List<Creature>> _enemies = new();
-    private Random _random = new();
+    private readonly Random _random = new();
 
     public EnemyManager(RoguelikeGame game) : base(game)
     {
     }
 
-    // public List<Creature> EnemiesOnLevel(int level)
-    // {
-    //     var l = new List<Creature>();
-    //     if (_enemies.Count >= level)
-    //     {
-    //         l.AddRange(_enemies[level - 1]);
-    //     }
-    //
-    //     return l;
-    // }
-
     public void InitializeEnemies()
     {
-        // _enemies.Clear();
         PopulateLevel(1);
+    }
+    
+    public void PopulateLevel(int level)
+    {
+        // Fill the dungeon level with randomly-placed monsters up to the cap
+        // Typically run when a level is first generated.
+
+        while (!EnemyCapReached(level))
+        {
+            SpawnNewEnemy(level);
+        } 
     }
 
     public void RunSpawnCycle()
@@ -38,25 +34,9 @@ public class EnemyManager : RoguelikeGameManager
         
     }
     
-    public void PopulateLevel(int level)
-    {
-        // Fill the dungeon level with randomly-placed monsters up to the cap
-        // Typically run when a level is first generated.
-        // Currently can only be run after player is placed on level, but I need to change that
-        // while (_enemies.Count < level)
-        // {
-        //     _enemies.Add(new List<Creature>());
-        // }
-
-        while (!EnemyCapReached(level))
-        {
-            SpawnNewEnemy(level);
-        } 
-    }
-    
     private void SpawnNewEnemy(int dungeonLevel)
     {
-        var enemy = new Creature();
+        var enemy = new Goblin();
         var shouldAddEnemy = true;
         try
         {
@@ -67,11 +47,13 @@ public class EnemyManager : RoguelikeGameManager
         {
             // ENEMY WAS PLACED IN INVALID POSITION (NO PATH TO PLAYER)
             enemy.Color = Color.Crimson;
+            Console.WriteLine(e.Message);
         }
         catch (NoValidLocationException e)
         {
             // NO VALID LOCATION EXISTS FOR ENEMY
             shouldAddEnemy = false;
+            Console.WriteLine(e.Message);
         }
         finally
         {
@@ -84,16 +66,9 @@ public class EnemyManager : RoguelikeGameManager
 
     private void AddEnemyToLevel(Creature enemy)
     {
-        // while (_enemies.Count < enemy.Location.Z)
-        // {
-        //     _enemies.Add(new List<Creature>());
-        // }
-        //
-        // _enemies[enemy.Location.Z - 1].Add(enemy);
         LevelManager.PlaceEntity(enemy);
         enemy.EntityWasDestroyed += LevelManager.OnDestroyEntity;
         enemy.OnLogEvent += ActivityLog.LogEvent;
-        // enemy.EntityWasDestroyed += RemoveEnemyFromWorld;
     }
 
     public void ProcessEnemyAttacks()
@@ -145,8 +120,10 @@ public class EnemyManager : RoguelikeGameManager
     private IntVector2 FindValidSpawnLocation(DungeonLevel level, Creature enemy)
     {
         var attempts = 200;
-        var pathfinder = new Pathfinder();
-        pathfinder.CreaturesBlockPath = false;
+        var pathfinder = new Pathfinder
+        {
+            CreaturesBlockPath = false
+        };
         var i = 0;
         do
         {

@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Roguelike.Entity.Feature;
-using Roguelike.Map;
 
-namespace Roguelike;
+namespace Roguelike.Map;
 
 public class MapGenerator
 {
@@ -19,6 +18,7 @@ public class MapGenerator
         var map = new TileMap(_mapSize.X, _mapSize.Y, dungeonLevel);
         // TODO: this is temporarily generating a level just for pahtfinding purposes, fix that
         var level = new DungeonLevel(map);
+        // level.LevelNumber = dungeonLevel;
         
         // Divide grid into regions that could contain rooms
         var currentOrigin = new IntVector2(0, 0);
@@ -149,8 +149,6 @@ public class MapGenerator
         PlaceStairsUp(level);
         PlaceStairsDown(level);
 
-        // SetDefaultEntryPoint(map);
-
         return map;
     }
 
@@ -191,7 +189,7 @@ public class MapGenerator
                 }
 
                 level.Map.StairsUp = new StairsUp(tile.X, tile.Y, level.LevelNumber);
-                level.Map.Features[tile.X, tile.Y].Add(level.Map.StairsUp);
+                // level.Map.Features[tile.X, tile.Y].Add(level.Map.StairsUp);
                 return;
         } while (attempts < 200);
 
@@ -221,8 +219,8 @@ public class MapGenerator
                 continue;
             }
             
-            level.Map.StairsDown = new StairsDown(tile.Location);
-            level.Map.Features[tile.Location.X, tile.Location.Y].Add(level.Map.StairsDown);
+            level.Map.StairsDown = new StairsDown(new IntVector3(tile.Location.To2D, level.LevelNumber));
+            // level.Map.Features[tile.Location.X, tile.Location.Y].Add(level.Map.StairsDown);
             return;
 
         } while (attempts < 200);

@@ -3,21 +3,16 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Roguelike.Entity;
 using Roguelike.Entity.Creature;
-using Roguelike.Entity.Feature;
 using Roguelike.Utility;
 
 namespace Roguelike;
 
 public class TurnManager : RoguelikeGameManager
 {
-    // private bool _isProcessing = false;
-
     private TurnPhase _phase = TurnPhase.Wait;
 
-    // public event EventHandler EnterMovePhase;
-
-    private Queue<MoveEventArgs> _moveQueue = new();
-    private Queue<AttackEventArgs> _attackQueue = new();
+    private readonly Queue<MoveEventArgs> _moveQueue = new();
+    private readonly Queue<AttackEventArgs> _attackQueue = new();
 
     public TurnManager(RoguelikeGame game) : base(game)
     {
@@ -62,13 +57,16 @@ public class TurnManager : RoguelikeGameManager
             }
             case TurnPhase.PlayerAttack:
             {
+                Console.WriteLine("Attack phase begin");
                 // TODO: Again, we probably don't need a queue for player actions
                 while (_attackQueue.Count > 0)
                 {
                     var attack = _attackQueue.Dequeue();
+                    Console.WriteLine("attack popped");
                     attack.Attacker.AttackEntity(attack.Defender);
+                    Console.WriteLine("attack performed");
                 }
-
+                Console.WriteLine("End Attack Phase");
                 _phase = _phase.Next();
                 break;
             }
@@ -132,8 +130,8 @@ public class TurnManager : RoguelikeGameManager
 
 public class AttackEventArgs : EventArgs
 {
-    public Creature Attacker;
-    public Creature Defender;
+    public readonly Creature Attacker;
+    public readonly Creature Defender;
 
     public AttackEventArgs(Creature atk, Creature def)
     {

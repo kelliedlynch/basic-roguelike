@@ -8,13 +8,12 @@ namespace Roguelike.Map;
 
 public class Pathfinder
 {
-    // private readonly TileMap _tileMap;
     public DirectionType MoveType = DirectionType.Octilinear;
     public bool CreaturesBlockPath = true;
 
-    private Dictionary<TileType, bool> _tilePassable = new();
+    private readonly Dictionary<TileType, bool> _tilePassable = new();
 
-    private Dictionary<TileType, int> _tileWeights = new();
+    private readonly Dictionary<TileType, int> _tileWeights = new();
 
 
     public Pathfinder()
@@ -47,18 +46,7 @@ public class Pathfinder
         var path = new Stack<DungeonTile>();
         var openList = new PriorityQueue<DungeonTile,float>();
         var closedList = new List<DungeonTile>();
-        // if (CreaturesBlockMovement)
-        // {
-        //     foreach (var c in tileMap.Creatures)
-        //     {
-        //         foreach (var creature in c)
-        //         {
-        //             closedList.Add(tileMap.GetTileAt(creature.Location.To2D));
-        //         }
-        //     }
-        // }
         
-        List<DungeonTile> adjacencies;
         DungeonTile current = startTile;
        
         // add start node to Open List
@@ -68,9 +56,8 @@ public class Pathfinder
         {
             current = openList.Dequeue();
             closedList.Add(current);
-            adjacencies = level.Map.GetAdjacentTiles(current, MoveType);
 
-            foreach(DungeonTile adj in adjacencies)
+            foreach(var adj in level.Map.GetAdjacentTiles(current, MoveType))
             {
                 if (!closedList.Contains(adj) 
                     && _tilePassable[adj.Type]
@@ -97,13 +84,13 @@ public class Pathfinder
         }
         
         // construct path, if end was not closed return null
-        if(!closedList.Exists(t => t.X == (int)end.X && t.Y == (int)end.Y))
+        if(!closedList.Exists(t => t.X == end.X && t.Y == end.Y))
         {
             return null;
         }
 
         // if all good, return path
-        DungeonTile temp = closedList[closedList.IndexOf(current)];
+        var temp = closedList[closedList.IndexOf(current)];
         if (temp == null) return null;
         do
         {

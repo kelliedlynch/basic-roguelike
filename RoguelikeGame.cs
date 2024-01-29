@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Roguelike.Entity;
 using Roguelike.Map;
 
 namespace Roguelike;
@@ -21,15 +18,7 @@ public class RoguelikeGame : Game
 
     public event EventHandler ConnectManagers;
 
-    public event EventHandler EndGame;
-    // public event EventHandler BeginGame;
-
-
-    // private void OnBeginGame(EventArgs e)
-    // {
-    //     var beginGame = BeginGame;
-    //     beginGame?.Invoke(this, e);
-    // }
+    // public event EventHandler EndGame;
     
     public RoguelikeGame()
     {
@@ -81,11 +70,6 @@ public class RoguelikeGame : Game
         base.Initialize();
     }
 
-    protected override void LoadContent()
-    {
-        base.LoadContent();
-    }
-
     protected override void BeginRun()
     {
         BeginGame();
@@ -96,7 +80,7 @@ public class RoguelikeGame : Game
         base.BeginRun();
     }
 
-    public void OnBeginGameRequested(object sender, EventArgs args)
+    private void OnBeginGameRequested(object sender, EventArgs args)
     {
         BeginGame();
     }
@@ -122,13 +106,6 @@ public class RoguelikeGame : Game
     {
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
-
-        // if (Keyboard.GetState().IsKeyDown(Keys.Space))
-        // {
-        //     BeginGame();
-        //     // EnemyManager.Enemies = new List<Creature>();
-        //     // PlayerManager.SpawnInPlayer(DrawEngine.TileMap);
-        // }
 
         base.Update(gameTime);
     }

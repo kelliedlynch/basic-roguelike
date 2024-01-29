@@ -11,7 +11,6 @@ public class RoguelikeGameManager : GameComponent
     public DrawEngine DrawEngine;
     public EnemyManager EnemyManager;
     public PlayerManager PlayerManager;
-    // public MapManager MapManager;
     public InputManager InputManager;
     public TurnManager TurnManager;
     public ActivityLog ActivityLog;
@@ -30,7 +29,6 @@ public class RoguelikeGameManager : GameComponent
         DrawEngine = Game.Services.GetService<DrawEngine>();
         EnemyManager = Game.Services.GetService<EnemyManager>();
         PlayerManager = Game.Services.GetService<PlayerManager>();
-        // MapManager = Game.Services.GetService<MapManager>();
         InputManager = Game.Services.GetService<InputManager>();
         TurnManager = Game.Services.GetService<TurnManager>();
         ActivityLog = Game.Services.GetService<ActivityLog>();

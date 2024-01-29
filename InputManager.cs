@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using StateMachine;
 
 namespace Roguelike;
 
@@ -14,6 +15,13 @@ public class InputManager : RoguelikeGameManager
     private const double FastMoveInterval = .15;
 
     public event EventHandler BeginNewGame;
+
+    
+    private enum TurnState {Waiting, Processing}
+    private enum InputTrigger {ArrowPressed}
+    private Fsm<TurnState, InputTrigger> inputMachine;
+
+
 
     public InputManager(RoguelikeGame game) : base(game)
     {
@@ -87,7 +95,9 @@ public class InputManager : RoguelikeGameManager
                 TurnManager.ProcessTurn();
                 return;
             }
+            Console.WriteLine("attempting move");
             PlayerManager.AttemptMove(new IntVector3(destination, Player.Location.Z));
+            Console.WriteLine("move attempted");
             TurnManager.ProcessTurn();
             
         }

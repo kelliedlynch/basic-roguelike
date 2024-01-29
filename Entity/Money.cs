@@ -11,6 +11,7 @@ public class Money : Entity
 
     public Money(int value)
     {
+        Name = $"{value} gold pieces";
         Value = value;
         SpriteLocation = new IntVector2(22, 4);
         Color = Color.Gold;

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using Roguelike.Entity.Feature;
 
 namespace Roguelike.Map;
@@ -9,11 +8,10 @@ public class TileMap
 {
     public readonly int Width;
     public readonly int Height;
+    public readonly int LevelNumber;
     public readonly DungeonTile[,] Tiles;
-    public readonly List<Feature>[,] Features;
     public StairsDown StairsDown;
     public StairsUp StairsUp;
-    // public IntVector2 EntryPoint;
 
     private readonly Random _random = new();
     
@@ -21,30 +19,25 @@ public class TileMap
     {
         Width = width;
         Height = height;
+        LevelNumber = level;
         Tiles = new DungeonTile[Width, Height];
-        Features = new List<Feature>[Width, Height];
         
         for (var i = 0; i < width; i++)
         {
             for (var j = 0; j < height; j++)
             {
                 Tiles[i, j] = new DungeonTile(i, j, level);
-                Features[i, j] = new List<Feature>();
             }
         }
     }
     
-    [UsedImplicitly]
     public List<DungeonTile> GetAdjacentTiles(DungeonTile tile, DirectionType adjacencyType = DirectionType.Octilinear)
     {
         return GetAdjacentTiles(new IntVector2(tile.X, tile.Y), adjacencyType);
     }
 
-    [UsedImplicitly]
     public List<DungeonTile> GetAdjacentTiles(IntVector2 location, DirectionType adjacencyType = DirectionType.Octilinear)
     {
-        // adjacencyType: 0 orthogonal, 1 diagonal, 2 both
-        
         var temp = new List<DungeonTile>();
 
         var row = location.Y;
@@ -97,9 +90,9 @@ public class TileMap
 
     public DungeonTile RandomAdjacentTile(IntVector2 pos, DirectionType adjacencyType = DirectionType.Octilinear)
     {
-        var index = _random.Next(7);
+        
         var tiles = GetAdjacentTiles(pos, adjacencyType);
-        // TODO: FIND WHY THIS WAS INVALID INDEX ONCE
+        var index = _random.Next(tiles.Count - 1);
         return tiles[index];
     }
 

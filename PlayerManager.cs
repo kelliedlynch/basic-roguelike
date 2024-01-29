@@ -1,24 +1,14 @@
 using System;
-using System.Buffers.Text;
-using Microsoft.Xna.Framework;
 using Roguelike.Entity;
-using Roguelike.Map;
 
 namespace Roguelike;
 
 public class PlayerManager : RoguelikeGameManager
 {
-    public Player Player = new();
+    public new Player Player = new();
   
     public PlayerManager(RoguelikeGame game) : base(game)
     {
-    }
-
-    protected override void OnConnectManagers(object sender, EventArgs e)
-    {
-        // This event happens when all the manager classes are loaded. This is where we
-        // subscribe to events from other managers.
-        base.OnConnectManagers(sender, e);
     }
     
     public void InitializePlayer()
@@ -39,6 +29,7 @@ public class PlayerManager : RoguelikeGameManager
             if (enemy.Location != loc) continue;
             var atk = new AttackEventArgs(Player, enemy);
             TurnManager.QueueAttack(atk);
+            Console.WriteLine("attack queued");
             skipMove = true;
         }
         

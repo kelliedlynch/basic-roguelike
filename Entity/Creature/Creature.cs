@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using Microsoft.Xna.Framework;
 using Roguelike.Map;
 
@@ -10,8 +8,8 @@ public class Creature : Entity
 {
     public bool Ready = false;
     
-    public Pathfinder Pathfinder = new ();
-    public event EventHandler<DestroyEventArgs> CreatureWasDestroyed;
+    public readonly Pathfinder Pathfinder = new ();
+
     public Creature()
     {
         SpriteLocation = new IntVector2(25, 2);
@@ -24,6 +22,7 @@ public class Creature : Entity
         var coin = new Money(1);
         var args = new DestroyEventArgs(this, new List<Entity>() { coin });
         InvokeEntityWasDestroyed(args);
+        LogEvent($"{Name} was destroyed");
         // EntityWasDestroyed?.Invoke(this, args);
     }
     
