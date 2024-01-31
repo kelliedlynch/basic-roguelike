@@ -13,9 +13,9 @@ public class MapGenerator
     private readonly IntVector2 _minRoomSize = new(3, 3);
     
     // Creates a dungeon-style map, with rectangular rooms and narrow passages connecting them
-    public TileMap GenerateDungeonMap(int dungeonLevel)
+    public DungeonMap GenerateDungeonMap(int dungeonLevel)
     {
-        var map = new TileMap(_mapSize.X, _mapSize.Y, dungeonLevel);
+        var map = new DungeonMap(_mapSize.X, _mapSize.Y, dungeonLevel);
         // TODO: this is temporarily generating a level just for pahtfinding purposes, fix that
         var level = new DungeonLevel(map);
         // level.LevelNumber = dungeonLevel;
@@ -152,12 +152,12 @@ public class MapGenerator
         return map;
     }
 
-    private bool IsValidStairsLocation(TileMap map, DungeonTile tile)
+    private bool IsValidStairsLocation(DungeonMap map, DungeonTile tile)
     {
         return IsValidStairsLocation(map, tile.Location.To2D);
     }
     
-    private bool IsValidStairsLocation(TileMap map, IntVector2 location)
+    private bool IsValidStairsLocation(DungeonMap map, IntVector2 location)
     { 
         var tile = map.GetTileAt(location); 
         if (tile.Type is TileType.Void or TileType.Wall
@@ -193,6 +193,7 @@ public class MapGenerator
                 return;
         } while (attempts < 200);
 
+
         throw new ValidLocationNotFoundException("Could not place stairs up");
     }
     
@@ -224,10 +225,12 @@ public class MapGenerator
             return;
 
         } while (attempts < 200);
+        
+        // TODO: FIND OUT WHY THIS HAPPENS SOMETIMES
         throw new ValidLocationNotFoundException("Could not place stairs down");
     }
     
-    private void PutUpWalls(TileMap map)
+    private void PutUpWalls(DungeonMap map)
     {
         foreach (var tile in map.Tiles)
         {

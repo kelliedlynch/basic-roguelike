@@ -1,6 +1,8 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Roguelike.Graphics;
 using Roguelike.Map;
 
 namespace Roguelike;
@@ -15,6 +17,7 @@ public class RoguelikeGame : Game
     public TurnManager TurnManager;
     public ActivityLog ActivityLog;
     public LevelManager LevelManager;
+    public SpriteBatch SpriteBatch;
 
     public event EventHandler ConnectManagers;
     public event EventHandler BeginNewGame;
@@ -28,7 +31,6 @@ public class RoguelikeGame : Game
         Graphics.PreferredBackBufferWidth = 800;
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
-
     }
 
     protected override void Initialize()
@@ -67,6 +69,9 @@ public class RoguelikeGame : Game
         Services.AddService(ActivityLog);
 
         ConnectManagers?.Invoke(this, EventArgs.Empty);
+        
+        SpriteBatch = new SpriteBatch(GraphicsDevice);
+        Services.AddService(typeof(SpriteBatch), SpriteBatch);
 
         base.Initialize();
     }
@@ -105,9 +110,22 @@ public class RoguelikeGame : Game
         base.Update(gameTime);
     }
 
-    protected override void Draw(GameTime gameTime)
+    protected override bool BeginDraw()
     {
         GraphicsDevice.Clear(Color.Black);
+        SpriteBatch.Begin();
+        return base.BeginDraw();
+    }
+
+    protected override void Draw(GameTime gameTime)
+    {
+
         base.Draw(gameTime);
+    }
+
+    protected override void EndDraw()
+    {
+        SpriteBatch.End();
+        base.EndDraw();
     }
 }

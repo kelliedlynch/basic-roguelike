@@ -1,4 +1,6 @@
 using Microsoft.Xna.Framework;
+using Roguelike.Entity.Creature;
+using Roguelike.Entity.Item;
 using Roguelike.Map;
 
 namespace Roguelike.Entity;
@@ -20,6 +22,8 @@ public class Player : Creature.Creature
     }
 
     
+
+    
     public Player()
     {
         SpriteLocation = new IntVector2(27, 0);
@@ -35,8 +39,15 @@ public class Player : Creature.Creature
         if (entity is Money money)
         {
             Money += money.Value;
-            entity.Destroy();
+            money.Destroy();
             LogEvent($"{Name} picked up {money.Value} gold");
+        }
+
+        if (entity is Weapon weapon)
+        {
+            Inventory.EquipItem(weapon);
+            weapon.Destroy();
+            LogEvent($"{Name} equipped {weapon.Name} (Atk {weapon.Atk})");
         }
     }
 

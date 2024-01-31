@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Roguelike.Entity;
+using Roguelike.Graphics;
 using Roguelike.Map;
 
 namespace Roguelike;
@@ -17,9 +18,15 @@ public class RoguelikeGameManager : GameComponent
     public LevelManager LevelManager;
     public Player Player => Game.Services.GetService<PlayerManager>().Player;
     
-    public RoguelikeGameManager(RoguelikeGame game) : base(game)
+    // public RoguelikeGameManager(RoguelikeGame game) : base(game)
+    // {
+    //     game.ConnectManagers += OnConnectManagers;
+    // }
+    
+    public RoguelikeGameManager(Game game) : base(game)
     {
-        game.ConnectManagers += OnConnectManagers;
+        var g = (RoguelikeGame)game;
+        g.ConnectManagers += OnConnectManagers;
     }
 
     protected virtual void OnConnectManagers(object sender, EventArgs e)

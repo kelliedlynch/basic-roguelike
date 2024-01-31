@@ -127,10 +127,8 @@ public class EnemyManager : RoguelikeGameManager
         var i = 0;
         do
         {
-            var x = _random.Next(level.Map.Width);
-            var y = _random.Next(level.Map.Height);
-            var tile = level.Map.GetTileAt(new IntVector2(x, y));
-            if (tile.Type is TileType.Void or TileType.Wall || tile.Location == Player.Location) continue;
+            var tile = level.Map.RandomFloorTile();
+            if (tile.Location == Player.Location) continue;
             var path = pathfinder.FindPath(level, tile.Location.To2D, Player.Location.To2D);
             if (path == null)
             {
@@ -158,10 +156,10 @@ public class PathfinderException : Exception
 
 public class NoValidLocationException : Exception
 {
-    public TileMap Map;
+    public DungeonMap Map;
     public Entity.Entity Entity;
     
-    public NoValidLocationException(TileMap map, Entity.Entity entity, string message) : base(message)
+    public NoValidLocationException(DungeonMap map, Entity.Entity entity, string message) : base(message)
     {
         Map = map;
         Entity = entity;

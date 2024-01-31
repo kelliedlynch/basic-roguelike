@@ -95,8 +95,6 @@ public class InputManager : RoguelikeGameManager
                         AttemptedMove?.Invoke(BuildMoveEvent(args.Key));
                     }
                 }
-                
-
             }
 
             else if (args.State == KeyState.Up)
@@ -149,13 +147,9 @@ public class InputManager : RoguelikeGameManager
     
     public override void Update(GameTime gameTime)
     {
-        
-        
-        // if (_inputState != InputState.Ready) return;
-        
+
         var keyboard = Keyboard.GetState();
         var pressed = keyboard.GetPressedKeys();
-        // if(pressed.Length > 0) Console.WriteLine("update");
 
         if (pressed.Contains(Keys.Space))
         {

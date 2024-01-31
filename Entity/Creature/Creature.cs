@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Roguelike.Entity.Item;
 using Roguelike.Event;
 using Roguelike.Map;
 
@@ -10,6 +11,21 @@ public class Creature : Entity
     public bool Ready = false;
     
     public readonly Pathfinder Pathfinder = new ();
+    public Inventory Inventory = new();
+
+    public int CalculatedAtk
+    {
+        get
+        {
+            var calc = Atk;
+            if (Inventory.Weapon is not null)
+            {
+                calc += Inventory.Weapon.Atk;
+            }
+
+            return calc;
+        }
+    }
 
     public Creature()
     {
@@ -28,7 +44,7 @@ public class Creature : Entity
     
     public virtual void AttackEntity(Entity entity)
     {
-        var damage = Atk - entity.Def;
+        var damage = CalculatedAtk - entity.Def;
         var args = new ActivityLogEventArgs($"{Name} hit {entity.Name} for {damage} damage");
         LogEvent(args);
         entity.TakeDamage(damage);

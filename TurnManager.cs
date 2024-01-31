@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Roguelike.Entity;
 using Roguelike.Entity.Creature;
+using Roguelike.Entity.Item;
 using Roguelike.Event;
 using Roguelike.Utility;
 
@@ -98,7 +99,9 @@ public class TurnManager : RoguelikeGameManager
             }
             case TurnPhase.PreAction:
             {
-                var pickups = LevelManager.CurrentLevel.MoneyAt(Player.Location.X, Player.Location.Y);
+                var pickups = new List<Entity.Entity>();
+                pickups.AddRange(LevelManager.CurrentLevel.MoneyAt(Player.Location.X, Player.Location.Y));
+                pickups.AddRange(LevelManager.CurrentLevel.ItemsAt(Player.Location.X, Player.Location.Y));
                 for (var index = pickups.Count - 1; index >= 0; index--)
                 {
                     var entity = pickups[index];
