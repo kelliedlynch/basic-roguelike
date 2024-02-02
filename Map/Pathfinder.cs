@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Roguelike.Utility;
 
 
 // Based on A* Implementation by Dave Cusatis https://github.com/davecusatis/A-Star-Sharp

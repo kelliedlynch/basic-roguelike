@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Roguelike.Entity.Feature;
+using Roguelike.Utility;
 
 namespace Roguelike.Map;
 

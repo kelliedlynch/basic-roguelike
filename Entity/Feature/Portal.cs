@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using Roguelike.Utility;
 
 namespace Roguelike.Entity.Feature;
 

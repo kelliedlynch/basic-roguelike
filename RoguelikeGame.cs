@@ -20,9 +20,6 @@ public class RoguelikeGame : Game
     public SpriteBatch SpriteBatch;
 
     public event EventHandler ConnectManagers;
-    public event EventHandler BeginNewGame;
-
-    // public event EventHandler EndGame;
     
     public RoguelikeGame()
     {
@@ -35,6 +32,11 @@ public class RoguelikeGame : Game
 
     protected override void Initialize()
     {
+        SpriteBatch = new SpriteBatch(GraphicsDevice);
+        Services.AddService(typeof(SpriteBatch), SpriteBatch);
+        
+        var font = Content.Load<SpriteFont>("Fonts/Kenney Mini");
+        Services.AddService(font);
 
         DrawEngine = new DrawEngine(this);
         Components.Add(DrawEngine);
@@ -70,8 +72,7 @@ public class RoguelikeGame : Game
 
         ConnectManagers?.Invoke(this, EventArgs.Empty);
         
-        SpriteBatch = new SpriteBatch(GraphicsDevice);
-        Services.AddService(typeof(SpriteBatch), SpriteBatch);
+
 
         base.Initialize();
     }

@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 
-namespace Roguelike;
+namespace Roguelike.Utility;
 
 public struct IntVector2 : IEquatable<IntVector2>
 {

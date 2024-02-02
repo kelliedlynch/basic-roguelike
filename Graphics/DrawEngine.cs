@@ -5,6 +5,7 @@ using Roguelike.Entity;
 using Roguelike.Graphics.Layout;
 using Roguelike.Map;
 using Roguelike.UserInterface;
+using Roguelike.Utility;
 
 namespace Roguelike.Graphics;
 
@@ -23,9 +24,10 @@ public class DrawEngine : DrawableGameComponent
 
     }
 
-    public override void Initialize()
+    protected override void LoadContent()
     {
         BuildLayout();
+        base.LoadContent();
     }
 
     public void BuildLayout()
@@ -38,34 +40,54 @@ public class DrawEngine : DrawableGameComponent
         // box.Text = "test";
         // container.AddElement(box);
 
-        var topBar = new VStackContainer((RoguelikeGame)Game, new Rectangle(0, 0, 200, 400));
+        var topBar = new VStackContainer((RoguelikeGame)Game, new Rectangle(0, 0, 300, 600));
         topBar.Sizing = AxisSizing.FixedXFixedY;
-        topBar.Outline.BorderWidth = 4;
-        topBar.Outline.BorderColor = Color.DarkGray;
+        topBar.ContentAlignment = Alignment.TopCenter;
+        topBar.Debug = true;
+        // topBar.Outline.BorderWidth = 4;
+        // topBar.Outline.BorderColor = Color.DarkGray;
+        Game.Components.Add(topBar);
         // topBar.ContentAlignment = Alignment.Center;
         
-        var moneyDisplay = new VStackContainer((RoguelikeGame)Game);
-        moneyDisplay.Sizing = AxisSizing.ShrinkXShrinkY;
-        moneyDisplay.Outline.BorderWidth = 3;
-        moneyDisplay.Outline.BorderColor = Color.DarkCyan;
-        moneyDisplay.DrawOrder = topBar.DrawOrder + 1;
-        topBar.AddChild(moneyDisplay);
+        // var moneyDisplay = new VStackContainer((RoguelikeGame)Game);
+        // moneyDisplay.Sizing = AxisSizing.ShrinkXShrinkY;
+        // moneyDisplay.ContentAlignment = Alignment.Center;
+        // moneyDisplay.Outline.BorderWidth = 3;
+        // moneyDisplay.Outline.BorderColor = Color.Aqua;
+        // moneyDisplay.DrawOrder = topBar.DrawOrder + 1;
+        // topBar.AddChild(moneyDisplay);
+        //
+        // var mbox1 = new VStackContainer((RoguelikeGame)Game);
+        // mbox1.Sizing = AxisSizing.ExpandXExpandY;
+        // mbox1.MinSize = new IntVector2(100, 100);
+        // mbox1.Outline.BorderWidth = 2;
+        // mbox1.Outline.BorderColor = Color.Magenta;
+        // mbox1.DrawOrder = moneyDisplay.DrawOrder + 1;
+        // moneyDisplay.AddChild(mbox1);
 
-        var mbox1 = new VStackContainer((RoguelikeGame)Game);
-        mbox1.Sizing = AxisSizing.ExpandXExpandY;
-        mbox1.MinSize = new IntVector2(100, 100);
-        mbox1.Outline.BorderWidth = 2;
-        mbox1.Outline.BorderColor = Color.Magenta;
-        mbox1.DrawOrder = moneyDisplay.DrawOrder + 1;
-        moneyDisplay.AddChild(mbox1);
-        
-        var mbox2 = new VStackContainer((RoguelikeGame)Game);
-        mbox2.Sizing = AxisSizing.ExpandXExpandY;
-        mbox2.MinSize = new IntVector2(50, 50);
-        mbox2.Outline.BorderWidth = 1;
-        mbox2.Outline.BorderColor = Color.LimeGreen;
-        mbox2.DrawOrder = mbox1.DrawOrder + 1;
-        moneyDisplay.AddChild(mbox2);
+        var testDialog = new DialogBox(Game);
+        // testDialog.Outline.BorderColor = Color.Red;
+        testDialog.Sizing = AxisSizing.ShrinkXShrinkY;
+        testDialog.TextLabel.Text = "testDialog";
+        // testDialog.Outline.BorderWidth = 4;
+        // testDialog.Outline.BorderColor = Color.Magenta;
+        topBar.AddChild(testDialog);
+
+        // var testLabel = new TextLabel(Game, "testLabel");
+        // testLabel.Outline.BorderColor = Color.Yellow;
+        // testLabel.Sizing = AxisSizing.ExpandXExpandY;
+        // testLabel.ContentAlignment = Alignment.TopLeft;
+        // // testLabel.Outline.BorderWidth = 6;
+        // testLabel.DrawOrder = mbox1.DrawOrder + 1;
+        // mbox1.AddChild(testLabel);
+        //
+        // var mbox2 = new VStackContainer((RoguelikeGame)Game);
+        // mbox2.Sizing = AxisSizing.FixedXFixedY;
+        // mbox2.MinSize = new IntVector2(50, 50);
+        // mbox2.Outline.BorderWidth = 1;
+        // mbox2.Outline.BorderColor = Color.LimeGreen;
+        // mbox2.DrawOrder = moneyDisplay.DrawOrder + 1;
+        // moneyDisplay.AddChild(mbox2);
 
 
         // var moneyBox = new DialogBox(Game);
@@ -158,6 +180,7 @@ public class DrawEngine : DrawableGameComponent
     public override void Draw(GameTime gameTime)
     {
         var levelManager = Game.Services.GetService<LevelManager>();
+        
         // var map = levelManager.CurrentMap;
         // var spriteBatch = Game.Services.GetService<SpriteBatch>();
         

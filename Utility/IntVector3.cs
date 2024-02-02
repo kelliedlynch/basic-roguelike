@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.Intrinsics.X86;
 using Microsoft.Xna.Framework;
+using Roguelike.Utility;
 
 namespace Roguelike;
 

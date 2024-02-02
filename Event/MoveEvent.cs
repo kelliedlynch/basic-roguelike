@@ -1,4 +1,5 @@
 using System;
+using Roguelike.Utility;
 
 namespace Roguelike.Event;
 

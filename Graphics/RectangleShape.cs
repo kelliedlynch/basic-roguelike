@@ -9,8 +9,8 @@ public class RectangleShape : DrawableGameComponent
     public Color BorderColor = Color.LimeGreen;
     public int BorderWidth = 1;
     public Rectangle Bounds;
-    
-    
+
+
     public RectangleShape(Game game) : base(game)
     {
     }
@@ -38,11 +38,12 @@ public class RectangleShape : DrawableGameComponent
             Bounds.Y, 
             BorderWidth, 
             Bounds.Height), BorderColor);
-        
+    
         spriteBatch.Draw(Pixel, new Rectangle(Bounds.X, 
             Bounds.Y + Bounds.Height - BorderWidth, 
             Bounds.Width, 
-            BorderWidth), BorderColor);
+            BorderWidth), BorderColor); 
+
         base.Draw(gameTime);
     }
 

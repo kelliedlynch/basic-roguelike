@@ -4,6 +4,7 @@ using Roguelike.Entity;
 using Roguelike.Entity.Creature;
 using Roguelike.Entity.Feature;
 using Roguelike.Entity.Item;
+using Roguelike.Utility;
 
 namespace Roguelike.Map;
 

@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using Roguelike.UserInterface;
+using Roguelike.Utility;
 
 namespace Roguelike.Graphics.Layout;
 
@@ -25,11 +27,9 @@ public class VStackContainer : Container
             y = Size.Y;
         }
 
-        var totalX = 0;
-        var totalY = 0;
-        var thisWidth = Math.Max(Math.Max(Size.X, MinSize.X), 1);
-        var thisHeight = Math.Max(Math.Max(Size.Y, MinSize.Y), 1);;
-
+        var totalChildrenX = 0;
+        var totalChildrenY = 0;
+        
         foreach (var child in Children)
         {
             if (child is Container c)
@@ -37,16 +37,12 @@ public class VStackContainer : Container
                 c.LayoutElements();
             }
             child.LocalPosition = new IntVector2(x, y);
-            var childWidth = Math.Max(Math.Max(child.Size.X, child.MinSize.X), 1);
-            var childHeight = Math.Max(Math.Max(child.Size.Y, child.MinSize.Y), 1);;
-            if ((child.Sizing & AxisSizing.ExpandX) != 0)
-            {
-                childWidth = thisWidth;
-            }
+            var childWidth = Math.Max(child.Size.X, 1);
+            var childHeight = Math.Max(child.Size.Y, 1);;
             
             if ((FlowType & FlowDirection.BottomToTop) != 0)
             {
-                y -= child.Size.Y;
+                y -= childHeight;
             }
 
             child.Size = new IntVector2(childWidth, childHeight);
@@ -54,30 +50,33 @@ public class VStackContainer : Container
             
             if ((FlowType & FlowDirection.TopToBottom) != 0)
             {
-                y += child.Size.Y;
+                y += childHeight;
             }
-
-            totalX = child.Size.X > totalX ? child.Size.X : totalX;
-            totalY += child.Size.Y;
+            
+            totalChildrenX = childWidth > totalChildrenX ? childWidth : totalChildrenX;
+            totalChildrenY += childHeight;
         }
+        
+        var thisWidth = Math.Max(Size.X, 1);
+        var thisHeight = Math.Max(Size.Y, 1);;
         
         if ((Sizing & AxisSizing.ShrinkX) != 0)
         {
-            thisWidth = totalX;
+            thisWidth = totalChildrenX;
         }
         if ((Sizing & AxisSizing.ShrinkY) != 0)
         {
-            thisHeight = totalY;
+            thisHeight = totalChildrenY;
         }
 
         Size = new IntVector2(thisWidth, thisHeight);
 
-        var unusedY = Size.Y - totalY;
-        var toExpand = Children.Where(el => (el.Sizing & AxisSizing.ExpandY) != 0).ToList();
-        if (toExpand.Count > 0)
+        var toExpandY = Children.Where(el => (el.Sizing & AxisSizing.ExpandY) != 0).ToList();
+        if (toExpandY.Count > 0)
         {
-            var expandEach = unusedY / toExpand.Count;
-            foreach (var element in toExpand)
+            var unusedY = Size.Y - totalChildrenY;
+            var expandEach = unusedY / toExpandY.Count;
+            foreach (var element in toExpandY)
             {
                 unusedY -= expandEach;
                 if (unusedY < expandEach)
@@ -86,9 +85,59 @@ public class VStackContainer : Container
                 }
                 element.Size = new IntVector2(element.Size.X, element.Size.Y + expandEach);
             }
+
+            totalChildrenY = Size.Y;
+        }
+        
+        var toExpandX = Children.Where(el => (el.Sizing & AxisSizing.ExpandX) != 0).ToList();
+        if (toExpandX.Count > 0)
+        {
+            foreach (var element in toExpandX)
+            {
+                element.Size = new IntVector2(Size.X, element.Size.Y);
+            }
+
+            totalChildrenX = Size.X;
         }
 
+        ContentsSize = new IntVector2(totalChildrenX, totalChildrenY);
+        
+        AlignChildren();
+    }
 
-        // base.LayoutElements();
+    public void AlignChildren()
+    {
+        var offsetY = 0;
+        if ((ContentAlignment & Alignment.Bottom) != 0)
+        {
+            offsetY = Size.Y - ContentsSize.Y;
+        }  
+        else if ((ContentAlignment & Alignment.Top) != 0)
+        {
+            offsetY = 0;
+        } 
+        else if ((ContentAlignment & Alignment.Center) != 0)
+        {
+            offsetY = (Size.Y - ContentsSize.Y) / 2;
+        }
+
+        foreach (var child in Children)
+        {
+            var offsetX = 0;
+            if ((ContentAlignment & Alignment.Right) != 0)
+            {
+                offsetX = Size.X - child.Size.X;
+            }  
+            else if ((ContentAlignment & Alignment.Left) != 0)
+            {
+                offsetX = 0;
+            } 
+            else if ((ContentAlignment & Alignment.Center) != 0)
+            {
+                offsetX = (Size.X - child.Size.X) / 2;
+            }
+
+            child.LocalPosition += new IntVector2(offsetX, offsetY);
+        }
     }
 }

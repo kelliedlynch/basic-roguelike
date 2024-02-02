@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Roguelike.Entity.Creature;
 using Roguelike.Entity.Item;
 using Roguelike.Map;
+using Roguelike.Utility;
 
 namespace Roguelike.Entity;
 
