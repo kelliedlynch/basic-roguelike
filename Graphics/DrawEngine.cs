@@ -15,7 +15,7 @@ public class DrawEngine : DrawableGameComponent
     private readonly IntVector2 _tileSize = new(16, 16);
     private const int TopBarHeight = 120;
     public List<Container> Containers = new();
-
+    public Container MapContainer;
 
 
 
@@ -32,76 +32,30 @@ public class DrawEngine : DrawableGameComponent
 
     public void BuildLayout()
     {
-        // var container = new Container(Game);
-        // Containers.Add(container);
-        // Game.Components.Add(container);
+        var player = Game.Services.GetService<PlayerManager>().Player;
+        var screenContainer = new VStackContainer(Game);
+        screenContainer.Sizing = AxisSizing.ExpandXExpandY;
+        screenContainer.Bounds = GraphicsDevice.Viewport.Bounds;
+        screenContainer.ContentAlignment = Alignment.Center;
+        Game.Components.Add(screenContainer);
+
+        var topBar = new DialogBox(Game);
+        topBar.Sizing = AxisSizing.ExpandXFixedY;
+        topBar.Size = new IntVector2(0, 40);
+        topBar.TextLabel.Text = $"$ {player.Money}  Lv. {player.Location.Z}  Atk. {player.CalculatedAtk}";
+        screenContainer.AddChild(topBar);
+
+        MapContainer = new Container(Game);
+        MapContainer.Sizing = AxisSizing.ExpandXExpandY;
+        // mapContainer.Sizing = AxisSizing.ExpandXFixedY;
+        // mapContainer.Size = new IntVector2(0, 300);
+        MapContainer.Debug = true;
+        screenContainer.AddChild(MapContainer);
         
-        // var box = new DialogBox(Game);
-        // box.Text = "test";
-        // container.AddElement(box);
-
-        var topBar = new VStackContainer((RoguelikeGame)Game, new Rectangle(0, 0, 300, 600));
-        topBar.Sizing = AxisSizing.FixedXFixedY;
-        topBar.ContentAlignment = Alignment.TopCenter;
-        topBar.Debug = true;
-        // topBar.Outline.BorderWidth = 4;
-        // topBar.Outline.BorderColor = Color.DarkGray;
-        Game.Components.Add(topBar);
-        // topBar.ContentAlignment = Alignment.Center;
-        
-        // var moneyDisplay = new VStackContainer((RoguelikeGame)Game);
-        // moneyDisplay.Sizing = AxisSizing.ShrinkXShrinkY;
-        // moneyDisplay.ContentAlignment = Alignment.Center;
-        // moneyDisplay.Outline.BorderWidth = 3;
-        // moneyDisplay.Outline.BorderColor = Color.Aqua;
-        // moneyDisplay.DrawOrder = topBar.DrawOrder + 1;
-        // topBar.AddChild(moneyDisplay);
-        //
-        // var mbox1 = new VStackContainer((RoguelikeGame)Game);
-        // mbox1.Sizing = AxisSizing.ExpandXExpandY;
-        // mbox1.MinSize = new IntVector2(100, 100);
-        // mbox1.Outline.BorderWidth = 2;
-        // mbox1.Outline.BorderColor = Color.Magenta;
-        // mbox1.DrawOrder = moneyDisplay.DrawOrder + 1;
-        // moneyDisplay.AddChild(mbox1);
-
-        var testDialog = new DialogBox(Game);
-        // testDialog.Outline.BorderColor = Color.Red;
-        testDialog.Sizing = AxisSizing.ShrinkXShrinkY;
-        testDialog.TextLabel.Text = "testDialog";
-        // testDialog.Outline.BorderWidth = 4;
-        // testDialog.Outline.BorderColor = Color.Magenta;
-        topBar.AddChild(testDialog);
-
-        // var testLabel = new TextLabel(Game, "testLabel");
-        // testLabel.Outline.BorderColor = Color.Yellow;
-        // testLabel.Sizing = AxisSizing.ExpandXExpandY;
-        // testLabel.ContentAlignment = Alignment.TopLeft;
-        // // testLabel.Outline.BorderWidth = 6;
-        // testLabel.DrawOrder = mbox1.DrawOrder + 1;
-        // mbox1.AddChild(testLabel);
-        //
-        // var mbox2 = new VStackContainer((RoguelikeGame)Game);
-        // mbox2.Sizing = AxisSizing.FixedXFixedY;
-        // mbox2.MinSize = new IntVector2(50, 50);
-        // mbox2.Outline.BorderWidth = 1;
-        // mbox2.Outline.BorderColor = Color.LimeGreen;
-        // mbox2.DrawOrder = moneyDisplay.DrawOrder + 1;
-        // moneyDisplay.AddChild(mbox2);
-
-
-        // var moneyBox = new DialogBox(Game);
-        // moneyBox.Text = $"$ {Game.Services.GetService<PlayerManager>().Player.Money}";
-        // moneyDisplay.AddChild(moneyBox);
-        // moneyBox.Outline.BorderWidth = 6;
-        // moneyBox.Outline.BorderColor = Color.Red;
-        // moneyBox.Sizing = AxisSizing.ExpandXExpandY;
-        // var moneyBox2 = new DialogBox(Game);
-        // moneyBox2.Text = $"$ {Game.Services.GetService<PlayerManager>().Player.Money} 2";
-        // moneyDisplay.AddChild(moneyBox2);
-        // moneyBox2.Outline.BorderWidth = 6;
-        // moneyBox2.Outline.BorderColor = Color.Pink;
-        // moneyBox.Sizing = AxisSizing.ExpandXExpandY;
+        var log = Game.Services.GetService<ActivityLog>();
+        log.Sizing = AxisSizing.ExpandXFixedY;
+        log.Size = new IntVector2(0, 78);
+        log.Reparent(screenContainer);
     }
 
     private void DrawSpriteAtLocation(SpriteRepresented sprite, IntVector2 loc, SpriteBatch spriteBatch)
@@ -124,7 +78,7 @@ public class DrawEngine : DrawableGameComponent
 
     private Point LocationToScreenCoords(IntVector2 loc)
     {
-        return new Point(loc.X * _tileSize.X, loc.Y * _tileSize.Y + TopBarHeight);
+        return new Point(MapContainer.Bounds.X + loc.X * _tileSize.X, MapContainer.Bounds.Y + loc.Y * _tileSize.Y);
     }
 
     private void DrawDungeon(DungeonMap map, SpriteBatch spriteBatch)
@@ -147,33 +101,15 @@ public class DrawEngine : DrawableGameComponent
         var font = Game.Content.Load<SpriteFont>("Fonts/Kenney Mini");
 
         var dollarLoc = new IntVector2(35, 16);
-        spriteBatch.Draw(tex, new Vector2(topBarPadding, topBarPadding),
-            new Rectangle(dollarLoc * _tileSize, _tileSize), Color.Gold);
-        var moneyFieldEnd = topBarPadding + _tileSize.X + labelSpacing + font.MeasureString($"{player.Money}").X;
-        spriteBatch.DrawString(font, $"{player.Money}",
-            new Vector2(topBarPadding + _tileSize.X + labelSpacing, topBarPadding), Color.Gold);
+
 
         var stairsLoc = new IntVector2(2, 6);
-        spriteBatch.Draw(tex, new Vector2(moneyFieldEnd + elementSpacing, topBarPadding),
-            new Rectangle(stairsLoc * _tileSize, _tileSize), Color.Gold);
-        var levelFieldEnd = moneyFieldEnd + elementSpacing + _tileSize.X + labelSpacing +
-                            font.MeasureString($"{player.Location.Z}").X;
-        spriteBatch.DrawString(font, $"{player.Location.Z}",
-            new Vector2(moneyFieldEnd + elementSpacing + _tileSize.X + labelSpacing, topBarPadding), Color.Gold);
 
         var heartLoc = new IntVector2(39, 10);
-        spriteBatch.Draw(tex, new Vector2(levelFieldEnd + elementSpacing, topBarPadding),
-            new Rectangle(heartLoc * _tileSize, _tileSize), Color.Gold);
-        var hpFieldEnd = levelFieldEnd + elementSpacing + _tileSize.X + labelSpacing +
-                         font.MeasureString($"{player.CalculatedAtk}").X;
-        spriteBatch.DrawString(font, $"{player.Hp}",
-            new Vector2(levelFieldEnd + elementSpacing + _tileSize.X + labelSpacing, topBarPadding), Color.Gold);
+
         
         var swordLoc = new IntVector2(32, 8);
-        spriteBatch.Draw(tex, new Vector2(hpFieldEnd + elementSpacing, topBarPadding),
-            new Rectangle(swordLoc * _tileSize, _tileSize), Color.Gold);
-        spriteBatch.DrawString(font, $"{player.CalculatedAtk}",
-            new Vector2(hpFieldEnd + elementSpacing + _tileSize.X + labelSpacing, topBarPadding), Color.Gold);
+
 
     }
     
@@ -181,40 +117,39 @@ public class DrawEngine : DrawableGameComponent
     {
         var levelManager = Game.Services.GetService<LevelManager>();
         
-        // var map = levelManager.CurrentMap;
-        // var spriteBatch = Game.Services.GetService<SpriteBatch>();
+        var map = levelManager.CurrentMap;
+        var spriteBatch = Game.Services.GetService<SpriteBatch>();
         
 
 
         // spriteBatch.Begin();
 
-        // DrawDungeon(map, spriteBatch);
-        //
-        // foreach (var entity in levelManager.CurrentLevel.EntitiesOnLevel())
-        // {
-        //     DrawSpriteAtLocation(entity, entity.Location.To2D, spriteBatch);
-        // }
-        //
-        // // Draw Player
-        // var player = Game.Services.GetService<PlayerManager>().Player;
-        // DrawSpriteAtLocation(player, player.Location.To2D, spriteBatch);
+        DrawDungeon(map, spriteBatch);
+        
+        foreach (var entity in levelManager.CurrentLevel.EntitiesOnLevel())
+        {
+            DrawSpriteAtLocation(entity, entity.Location.To2D, spriteBatch);
+        }
+        
+        // Draw Player
+        var player = Game.Services.GetService<PlayerManager>().Player;
+        DrawSpriteAtLocation(player, player.Location.To2D, spriteBatch);
         //
         // DrawTopBar(spriteBatch, player);
         //
         //
         //
-        // var log = Game.Services.GetService<ActivityLog>();
-        // log.Size = new IntVector2(48, 4);
+
         // log.BoxAlignment = Alignment.BottomCenter;
         // log.DrawBox(spriteBatch);
         //
         //
-        // if (Game.Services.GetService<InputManager>().GameState == GameRunningState.GameOver)
-        // {
-        //     var gameOverMsg = new DialogBox(Game);
-        //     gameOverMsg.Text = "Game Over";
-        //     gameOverMsg.DrawBox(spriteBatch);
-        // }
+        if (Game.Services.GetService<InputManager>().GameState == GameRunningState.GameOver)
+        {
+            var gameOverMsg = new DialogBox(Game);
+            gameOverMsg.TextLabel.Text = "Game Over";
+            Game.Components.Add(gameOverMsg);
+        }
 
 
         // spriteBatch.End();

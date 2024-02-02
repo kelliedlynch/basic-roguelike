@@ -9,7 +9,7 @@ namespace Roguelike.Map;
 public class MapGenerator
 {
     private readonly Random _random = new();
-    private readonly IntVector2 _mapSize = new IntVector2(50, 62);
+    private readonly IntVector2 _mapSize = new IntVector2(50, 61);
     private readonly IntVector2 _maxRoomRegionSize = new(14, 18);
     private readonly IntVector2 _minRoomSize = new(3, 3);
     

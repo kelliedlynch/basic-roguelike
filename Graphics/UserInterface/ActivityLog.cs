@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Roguelike.Graphics;
 using Roguelike.UserInterface;
 using Roguelike.Utility;
 using Vector2 = System.Numerics.Vector2;
@@ -12,38 +13,65 @@ namespace Roguelike;
 public class ActivityLog : DialogBox
 {
     public List<string> Messages = new();
+    public int LineSpacing = 2;
 
-    public ActivityLog(RoguelikeGame game) : base(game)
+    public ActivityLog(Game game) : base(game)
     {
-        Visible = false;
+        ContentAlignment = Alignment.BottomLeft;
     }
 
+    
+    
     public void InitializeLog()
     {
         Messages.Clear();
     }
-    
+
     public void LogEvent(object sender, EventArgs args)
     {
         var a = (ActivityLogEventArgs)args;
         Messages.Add(a.Message);
     }
 
-    protected void DrawText(SpriteBatch spriteBatch)
+    public void Reparent(Container c)
     {
-        var textHeight = TileSize.Y;
-        var lineNumber = 1;
+        Parent = c;
+
+        c.ChangedSize += OnParentChangedSize;
+        ChangedSize += c.OnChildChangedSize;
+        
+        c.Children.Add(this);
+    }
+    
+    
+    protected void BuildText()
+    {
         var lineHeight = (int)TextLabel.Font.MeasureString("Q").Y;
-        var linePadding = 2;
-        while (textHeight < Size.Y * TileSize.Y)
+        var lineNumber = 1;
+        var textHeight = 0;
+        // var currentY = Size.Y - PaddingBottom - LineSpacing;
+        //
+        // var spriteBatch = Game.Services.GetService<SpriteBatch>();
+        TextLabel.Text = "";
+        while (textHeight < Size.Y - PaddingTop - PaddingBottom)
         {
             if (Messages.Count < lineNumber) break;
-            var loc = new IntVector2(Position.X + TileSize.X,
-                Position.Y + (Size.Y + 2) * TileSize.Y - textHeight - lineHeight);
-            spriteBatch.DrawString(TextLabel.Font, Messages[^lineNumber],loc, Color.White);
-            textHeight += lineHeight + linePadding;
+            // currentY -= (lineHeight + LineSpacing) * lineNumber;
+            // var loc = new IntVector2(PaddingLeft, currentY);
+            // TODO: CURRENTLY THIS ONLY WORKS FOR MESSAGES THAT TAKE UP ONLY ONE LINE
+            //      ADD IN WORD WRAPPING AND DYNAMIC LINE SIZING
+            // spriteBatch.DrawString(TextLabel.Font, Messages[^lineNumber],loc, Color.White);
+            TextLabel.Text += "\n" + Messages[^lineNumber];
+            textHeight += lineHeight + LineSpacing;
             lineNumber++;
         }
+    }
+
+
+    public override void Draw(GameTime gameTime)
+    {
+        BuildText();
+        base.Draw(gameTime);
     }
 }
 

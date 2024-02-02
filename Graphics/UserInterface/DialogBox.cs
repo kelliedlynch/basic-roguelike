@@ -45,10 +45,12 @@ public class DialogBox : Container
         if ((Sizing & AxisSizing.ShrinkX) != 0)
         {
             sizeX = Math.Max(MinSize.X, TextLabel.Size.X);
+            sizeX += PaddingLeft + PaddingRight;
         }
         if ((Sizing & AxisSizing.ShrinkY) != 0)
         {
             sizeY = Math.Max(MinSize.Y, TextLabel.Size.Y);
+            sizeY += PaddingTop + PaddingBottom;
         }
 
         var baseSize = new IntVector2(sizeX, sizeY);
@@ -56,26 +58,26 @@ public class DialogBox : Container
         var tilesY = (int)Math.Ceiling((decimal)baseSize.Y / TileSize.Y);
         Size = new IntVector2(tilesX, tilesY) * TileSize;
 
-        
 
+        var safeAreaSize = new IntVector2(Size.X - PaddingLeft - PaddingRight, Size.Y - PaddingTop - PaddingBottom);
         var padding = Size - TextLabel.Size;
-        var offsetX = padding.X / 2;
-        var offsetY = padding.Y / 2;
+        var offsetX = padding.X / 2 + PaddingLeft;
+        var offsetY = padding.Y / 2 + PaddingTop;
         if ((ContentAlignment & Alignment.Left) != 0)
         {
-            offsetX = 0;
+            offsetX = PaddingLeft;
         }
         else if ((ContentAlignment & Alignment.Right) != 0)
         {
-            offsetX = padding.X;
+            offsetX = padding.X - PaddingRight;
         }
         if ((ContentAlignment & Alignment.Top) != 0)
         {
-            offsetY = 0;
+            offsetY = PaddingTop;
         }
         else if ((ContentAlignment & Alignment.Bottom) != 0)
         {
-            offsetY = padding.Y;
+            offsetY = padding.Y - PaddingBottom;
         }
 
         TextLabel.LocalPosition = new IntVector2(offsetX, offsetY);
