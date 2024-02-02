@@ -17,7 +17,7 @@ public class MapGenerator
     public DungeonMap GenerateDungeonMap(int dungeonLevel)
     {
         var map = new DungeonMap(_mapSize.X, _mapSize.Y, dungeonLevel);
-        // TODO: this is temporarily generating a level just for pahtfinding purposes, fix that
+        // TODO: this is temporarily generating a level just for pathfinding purposes, fix that
         var level = new DungeonLevel(map);
         // level.LevelNumber = dungeonLevel;
         

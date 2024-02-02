@@ -31,7 +31,6 @@ public class TurnManager : RoguelikeGameManager
 
     public void OnAttemptedMove(MoveEventArgs args)
     {
-        Console.WriteLine("attempt move");
         PlayerManager.AttemptMove(args.ToLocation);
         ProcessTurn();
     }

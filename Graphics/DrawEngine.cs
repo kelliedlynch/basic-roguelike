@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Roguelike.Entity;
 using Roguelike.Graphics.Layout;
+using Roguelike.Graphics.UserInterface;
 using Roguelike.Map;
 using Roguelike.UserInterface;
 using Roguelike.Utility;
@@ -39,10 +40,11 @@ public class DrawEngine : DrawableGameComponent
         screenContainer.ContentAlignment = Alignment.Center;
         Game.Components.Add(screenContainer);
 
-        var topBar = new DialogBox(Game);
+        var topBar = new SpritePanel(Game);
         topBar.Sizing = AxisSizing.ExpandXFixedY;
-        topBar.Size = new IntVector2(0, 40);
-        topBar.TextLabel.Text = $"$ {player.Money}  Lv. {player.Location.Z}  Atk. {player.CalculatedAtk}";
+        topBar.Size = new IntVector2(0, 48);
+        topBar.Debug = true;
+        // topBar.TextLabel.Text = $"$ {player.Money}  Lv. {player.Location.Z}  Atk. {player.CalculatedAtk}";
         screenContainer.AddChild(topBar);
 
         MapContainer = new Container(Game);
@@ -51,11 +53,21 @@ public class DrawEngine : DrawableGameComponent
         // mapContainer.Size = new IntVector2(0, 300);
         MapContainer.Debug = true;
         screenContainer.AddChild(MapContainer);
+        topBar.DrawOrder = MapContainer.DrawOrder + 1;
         
         var log = Game.Services.GetService<ActivityLog>();
         log.Sizing = AxisSizing.ExpandXFixedY;
         log.Size = new IntVector2(0, 78);
+        log.Debug = true;
         log.Reparent(screenContainer);
+
+        var menu = new InventoryMenu(Game);
+        menu.Position = new IntVector2(200, 400);
+        menu.Size = new IntVector2(200, 300);
+        menu.Debug = true;
+        // menu.DrawOrder = MapContainer.DrawOrder + 1000;
+        
+        Game.Components.Add(menu);
     }
 
     private void DrawSpriteAtLocation(SpriteRepresented sprite, IntVector2 loc, SpriteBatch spriteBatch)
