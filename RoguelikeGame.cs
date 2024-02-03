@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Roguelike.Entity;
 using Roguelike.Graphics;
 using Roguelike.Map;
 
@@ -17,6 +18,7 @@ public class RoguelikeGame : Game
     public TurnManager TurnManager;
     public ActivityLog ActivityLog;
     public LevelManager LevelManager;
+    public MenuManager MenuManager;
     public SpriteBatch SpriteBatch;
 
     public event EventHandler ConnectManagers;
@@ -43,38 +45,37 @@ public class RoguelikeGame : Game
         Services.AddService(typeof(DrawEngine), DrawEngine);
         
         PlayerManager = new PlayerManager(this);
-        Components.Add(PlayerManager);
-        Services.AddService(typeof(PlayerManager), PlayerManager);
-
-        // MapManager = new MapManager(this);
-        // Components.Add(MapManager);
-        // Services.AddService(typeof(MapManager), MapManager);
+        AddManager(PlayerManager);
         
         EnemyManager = new EnemyManager(this);
-        Components.Add(EnemyManager);
-        Services.AddService(typeof(EnemyManager), EnemyManager);
+        AddManager(EnemyManager);
 
         LevelManager = new LevelManager(this);
-        Components.Add(LevelManager);
-        Services.AddService(typeof(LevelManager), LevelManager);
+        AddManager(LevelManager);
 
         InputManager = new InputManager(this);
-        Components.Add(InputManager);
-        Services.AddService(typeof(InputManager), InputManager);
+        AddManager(InputManager);
 
         TurnManager = new TurnManager(this);
-        Components.Add(TurnManager);
-        Services.AddService(TurnManager);
+        AddManager(TurnManager);
 
         ActivityLog = new ActivityLog(this);
         Components.Add(ActivityLog);
         Services.AddService(ActivityLog);
 
-        ConnectManagers?.Invoke(this, EventArgs.Empty);
+        MenuManager = new MenuManager(this);
+        AddManager(MenuManager);
         
 
-
+        ConnectManagers?.Invoke(this, EventArgs.Empty);
+        
         base.Initialize();
+    }
+
+    private void AddManager(RoguelikeGameManager m)
+    {
+        Components.Add(m);
+        Services.AddService(m.GetType(), m);
     }
 
     protected override void BeginRun()

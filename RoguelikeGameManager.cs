@@ -16,6 +16,7 @@ public class RoguelikeGameManager : GameComponent
     public TurnManager TurnManager;
     public ActivityLog ActivityLog;
     public LevelManager LevelManager;
+    public MenuManager MenuManager;
     public Player Player => Game.Services.GetService<PlayerManager>().Player;
     
     // public RoguelikeGameManager(RoguelikeGame game) : base(game)
@@ -39,6 +40,7 @@ public class RoguelikeGameManager : GameComponent
         TurnManager = Game.Services.GetService<TurnManager>();
         ActivityLog = Game.Services.GetService<ActivityLog>();
         LevelManager = Game.Services.GetService<LevelManager>();
+        MenuManager = Game.Services.GetService<MenuManager>();
         
         AfterConnectManagers();
     }

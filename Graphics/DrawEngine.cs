@@ -40,9 +40,9 @@ public class DrawEngine : DrawableGameComponent
         screenContainer.ContentAlignment = Alignment.Center;
         Game.Components.Add(screenContainer);
 
-        var topBar = new SpritePanel(Game);
-        topBar.Sizing = AxisSizing.ExpandXFixedY;
-        topBar.Size = new IntVector2(0, 48);
+        var topBar = new InfoBar(Game);
+        // topBar.Sizing = AxisSizing.ExpandXFixedY;
+        // topBar.Size = new IntVector2(0, 48);
         topBar.Debug = true;
         // topBar.TextLabel.Text = $"$ {player.Money}  Lv. {player.Location.Z}  Atk. {player.CalculatedAtk}";
         screenContainer.AddChild(topBar);
@@ -61,13 +61,11 @@ public class DrawEngine : DrawableGameComponent
         log.Debug = true;
         log.Reparent(screenContainer);
 
-        var menu = new InventoryMenu(Game);
+        var menu = Game.Services.GetService<MenuManager>().InventoryMenu;
         menu.Position = new IntVector2(200, 400);
         menu.Size = new IntVector2(200, 300);
         menu.Debug = true;
         // menu.DrawOrder = MapContainer.DrawOrder + 1000;
-        
-        Game.Components.Add(menu);
     }
 
     private void DrawSpriteAtLocation(SpriteRepresented sprite, IntVector2 loc, SpriteBatch spriteBatch)

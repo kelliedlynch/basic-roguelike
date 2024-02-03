@@ -105,7 +105,7 @@ public class VStackContainer : Container
         AlignChildren();
     }
 
-    public void AlignChildren()
+    protected override void AlignChildren()
     {
         var offsetY = 0;
         if ((ContentAlignment & Alignment.Bottom) != 0)

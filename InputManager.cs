@@ -10,6 +10,10 @@ namespace Roguelike;
 public class InputManager : RoguelikeGameManager
 {
     public GameRunningState GameState = GameRunningState.GameOver;
+
+    private List<Keys> WaitingForKeyUp = new();
+
+
     private const double FastMoveDelay = .4;
     private const double StandardMoveInterval = .1;
     private const double FastMoveInterval = .01;
@@ -28,6 +32,7 @@ public class InputManager : RoguelikeGameManager
 
     public event KeyEventHandler KeyEvent;
     public event MoveEventHandler AttemptedMove;
+    public event EventHandler InventoryMenuToggled;
 
     private enum InputState {Ready, Processing}
 
@@ -69,12 +74,12 @@ public class InputManager : RoguelikeGameManager
     {
         if (MovementKeys.Contains(args.Key))
         {
-            if (args.State == KeyState.Down)
+            if (args.State == KeyState.Down && args.Time is 0)
             {
                 _inputState = InputState.Processing;
                 AttemptedMove?.Invoke(BuildMoveEvent(args.Key));
             }
-            else if (args.State == KeyState.Held)
+            else if (args.State == KeyState.Down)
             {
                 _keyDownTime += args.Time;
                 if (_fastMoveEngaged)
@@ -103,6 +108,13 @@ public class InputManager : RoguelikeGameManager
                 _keyDownTime = 0;
                 _moveTimer = 0;
                 _lastKeysPressed = Array.Empty<Keys>();
+            }
+        }
+        else if (args.Key is Keys.I)
+        {
+            if (args.State == KeyState.Down && args.Time is 0)
+            {
+                MenuManager.InventoryMenu.Visible = !MenuManager.InventoryMenu.Visible;
             }
         }
     }
@@ -176,7 +188,7 @@ public class InputManager : RoguelikeGameManager
                 else
                 {
                     // else key is held down
-                    args.State = KeyState.Held;
+                    args.State = KeyState.Down;
                     args.Time = gameTime.ElapsedGameTime.TotalSeconds;
                     KeyEvent?.Invoke(args);
                 }
@@ -216,7 +228,7 @@ public enum GameRunningState
 }
 
 public delegate void KeyEventHandler(KeyEventArgs args);
-public enum KeyState{ Up, Down, Held}
+// public enum KeyState{ Up, Down, Held}
 
 public class KeyEventArgs : EventArgs
 {
