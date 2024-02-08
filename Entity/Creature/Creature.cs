@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using Roguelike.Entity.Item;
 using Roguelike.Event;
 using Roguelike.Map;
 using Roguelike.Utility;
