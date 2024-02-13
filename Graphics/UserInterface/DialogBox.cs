@@ -33,35 +33,35 @@ public class DialogBox : SpritePanel
         AddChild(TextLabel);
     }
 
-    public DialogBox(Game game, IntVector2 size) : this(game)
+    public DialogBox(Game game, IntVector2 assignedSize) : this(game)
     {
-        Size = size;
+        AssignedSize = assignedSize;
     }
 
     public override void LayoutElements()
     {
-        TextLabel.LayoutElements();
-        var sizeX = Math.Max(Size.X, MinSize.X);
-        var sizeY = Math.Max(Size.Y, MinSize.Y);
+        // TextLabel.LayoutElements();
+        var sizeX = Math.Max(CalculatedSize.X, MinSize.X);
+        var sizeY = Math.Max(CalculatedSize.Y, MinSize.Y);
         if ((Sizing & AxisSizing.ShrinkX) != 0)
         {
-            sizeX = Math.Max(MinSize.X, TextLabel.Size.X);
+            sizeX = Math.Max(MinSize.X, TextLabel.CalculatedSize.X);
             sizeX += PaddingLeft + PaddingRight;
         }
         if ((Sizing & AxisSizing.ShrinkY) != 0)
         {
-            sizeY = Math.Max(MinSize.Y, TextLabel.Size.Y);
+            sizeY = Math.Max(MinSize.Y, TextLabel.CalculatedSize.Y);
             sizeY += PaddingTop + PaddingBottom;
         }
 
         var baseSize = new IntVector2(sizeX, sizeY);
         var tilesX = (int)Math.Ceiling((decimal)baseSize.X / TileSize.X);
         var tilesY = (int)Math.Ceiling((decimal)baseSize.Y / TileSize.Y);
-        Size = new IntVector2(tilesX, tilesY) * TileSize;
+        AssignedSize = new IntVector2(tilesX, tilesY) * TileSize;
 
 
-        var safeAreaSize = new IntVector2(Size.X - PaddingLeft - PaddingRight, Size.Y - PaddingTop - PaddingBottom);
-        var padding = Size - TextLabel.Size;
+        var safeAreaSize = new IntVector2(CalculatedSize.X - PaddingLeft - PaddingRight, CalculatedSize.Y - PaddingTop - PaddingBottom);
+        var padding = CalculatedSize - TextLabel.CalculatedSize;
         var offsetX = padding.X / 2 + PaddingLeft;
         var offsetY = padding.Y / 2 + PaddingTop;
         if ((ContentAlignment & Alignment.Left) != 0)

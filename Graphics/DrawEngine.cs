@@ -44,6 +44,8 @@ public class DrawEngine : DrawableGameComponent
         // topBar.Sizing = AxisSizing.ExpandXFixedY;
         // topBar.Size = new IntVector2(0, 48);
         topBar.Debug = true;
+        topBar.Outline.BorderColor = Color.Red;
+        topBar.Visible = false;
         // topBar.TextLabel.Text = $"$ {player.Money}  Lv. {player.Location.Z}  Atk. {player.CalculatedAtk}";
         screenContainer.AddChild(topBar);
 
@@ -52,18 +54,25 @@ public class DrawEngine : DrawableGameComponent
         // mapContainer.Sizing = AxisSizing.ExpandXFixedY;
         // mapContainer.Size = new IntVector2(0, 300);
         MapContainer.Debug = true;
+        MapContainer.Outline.BorderColor = Color.Yellow;
         screenContainer.AddChild(MapContainer);
         topBar.DrawOrder = MapContainer.DrawOrder + 1;
-        
+
         var log = Game.Services.GetService<ActivityLog>();
+        // Game.Components.Add(log);
+        // Game.Services.AddService(log);
         log.Sizing = AxisSizing.ExpandXFixedY;
-        log.Size = new IntVector2(0, 78);
+        log.AssignedSize = new IntVector2(0, 78);
         log.Debug = true;
-        log.Reparent(screenContainer);
+        log.Outline.BorderColor = Color.Aqua;
+        screenContainer.AddChild(log);
+        // log.InitializeLog();
+
+        // log.Reparent(screenContainer);
 
         var menu = Game.Services.GetService<MenuManager>().InventoryMenu;
         menu.Position = new IntVector2(200, 400);
-        menu.Size = new IntVector2(200, 300);
+        menu.AssignedSize = new IntVector2(200, 300);
         menu.Debug = true;
         // menu.DrawOrder = MapContainer.DrawOrder + 1000;
     }

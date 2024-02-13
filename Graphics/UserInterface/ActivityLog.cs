@@ -32,17 +32,6 @@ public class ActivityLog : DialogBox
         var a = (ActivityLogEventArgs)args;
         Messages.Add(a.Message);
     }
-
-    public void Reparent(Container c)
-    {
-        Parent = c;
-
-        c.ChangedSize += OnParentChangedSize;
-        ChangedSize += c.OnChildChangedSize;
-        
-        c.Children.Add(this);
-    }
-    
     
     protected void BuildText()
     {
@@ -53,7 +42,7 @@ public class ActivityLog : DialogBox
         //
         // var spriteBatch = Game.Services.GetService<SpriteBatch>();
         TextLabel.Text = "";
-        while (textHeight < Size.Y - PaddingTop - PaddingBottom)
+        while (textHeight < CalculatedSize.Y - PaddingTop - PaddingBottom)
         {
             if (Messages.Count < lineNumber) break;
             // currentY -= (lineHeight + LineSpacing) * lineNumber;
@@ -65,6 +54,7 @@ public class ActivityLog : DialogBox
             textHeight += lineHeight + LineSpacing;
             lineNumber++;
         }
+        LayoutElements();
     }
 
 

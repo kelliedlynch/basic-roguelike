@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Roguelike.UserInterface;
@@ -21,10 +22,13 @@ public class TextLabel : Container
     private string _text = "";
     public SpriteFont Font;
     public IntVector2 TextPosition;
+
+    
     
     public TextLabel(Game game) : base(game)
     {
         Font = game.Services.GetService<SpriteFont>();
+        LayoutSizeChanged += OnLayoutSizeChanged;
     }
 
     public TextLabel(Game game, Rectangle bounds) : this(game)
@@ -46,10 +50,15 @@ public class TextLabel : Container
         // Size = s.ToIntVector2();
     }
 
+    public void OnLayoutSizeChanged(Container sender)
+    {
+        LayoutElements();
+    }
+    
     public override void LayoutElements()
     {
         var textSize = Font.MeasureString(Text).ToIntVector2();
-        var padding = Size - textSize;
+        var padding = CalculatedSize - textSize;
         var offsetX = padding.X / 2;
         var offsetY = padding.Y / 2;
         if ((ContentAlignment & Alignment.Top) != 0)

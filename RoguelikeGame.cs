@@ -16,7 +16,7 @@ public class RoguelikeGame : Game
     public PlayerManager PlayerManager;
     public InputManager InputManager;
     public TurnManager TurnManager;
-    public ActivityLog ActivityLog;
+    // public ActivityLog ActivityLog;
     public LevelManager LevelManager;
     public MenuManager MenuManager;
     public SpriteBatch SpriteBatch;
@@ -59,9 +59,8 @@ public class RoguelikeGame : Game
         TurnManager = new TurnManager(this);
         AddManager(TurnManager);
 
-        ActivityLog = new ActivityLog(this);
-        Components.Add(ActivityLog);
-        Services.AddService(ActivityLog);
+        var log = new ActivityLog(this);
+        Services.AddService(log);
 
         MenuManager = new MenuManager(this);
         AddManager(MenuManager);
@@ -89,7 +88,7 @@ public class RoguelikeGame : Game
 
     public void BeginGame()
     {
-        ActivityLog.InitializeLog();
+        Services.GetService<ActivityLog>().InitializeLog();
         PlayerManager.InitializePlayer();
         LevelManager.InitializeLevels();
         EnemyManager.InitializeEnemies();

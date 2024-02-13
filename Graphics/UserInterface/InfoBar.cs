@@ -36,7 +36,7 @@ public class InfoBar : SpritePanel
     {
         ContentAlignment = Alignment.Center;
         Sizing = AxisSizing.ExpandXFixedY;
-        Size = new IntVector2(0, 64);
+        AssignedSize = new IntVector2(0, 64);
         BuildLayout();
     }
 
@@ -51,7 +51,7 @@ public class InfoBar : SpritePanel
 
         _mIconContainer = new Container(Game);
         _mIconContainer.Sizing = AxisSizing.FixedXFixedY;
-        _mIconContainer.Size = TileSize;
+        _mIconContainer.AssignedSize = TileSize;
         _layoutContainer.AddChild(_mIconContainer);
 
         _mLabel = new TextLabel(Game);
@@ -80,15 +80,16 @@ public class InfoBar : SpritePanel
     public override void Draw(GameTime gameTime)
     {
         // BuildPanel();
+        base.Draw(gameTime);
         var spriteBatch = Game.Services.GetService<SpriteBatch>();
         var mIconRect = new Rectangle(_moneyIconLoc * TileSize, TileSize);
         var sIconRect = new Rectangle(_stairsIconLoc * TileSize, TileSize);
         var hIconRect = new Rectangle(_heartIconLoc * TileSize, TileSize);
         var swIconRect = new Rectangle(_swordIconLoc * TileSize, TileSize);
         
-        var texture = Game.Content.Load<Texture2D>(SpriteSheet);
+        var texture = Game.Content.Load<Texture2D>("Graphics/monochrome-transparent_packed");
         spriteBatch.Draw(texture, _mIconContainer.Bounds, mIconRect, Color.Gold);
-        // base.Draw(gameTime);
+        
         
     }
 }

@@ -26,7 +26,7 @@ public class HStackContainer : Container
         var rtl = (FlowType & FlowDirection.RightToLeft) != 0;
         if (rtl)
         {
-            x = Size.X;
+            x = AssignedSize.X;
         }
 
         var totalChildrenX = 0;
@@ -34,33 +34,33 @@ public class HStackContainer : Container
         
         foreach (var child in Children)
         {
-            if (child is Container c)
-            {
-                c.LayoutElements();
-            }
+            // if (child is Container c)
+            // {
+            //     c.LayoutElements();
+            // }
             child.LocalPosition = new IntVector2(x, y);
-            var childWidth = Math.Max(child.Size.X, 1);
-            var childHeight = Math.Max(child.Size.Y, 1);;
+            var childWidth = Math.Max(child.AssignedSize.X, 1);
+            var childHeight = Math.Max(child.AssignedSize.Y, 1);;
             
             if (rtl)
             {
-                y -= childHeight;
+                x -= childWidth;
             }
 
-            child.Size = new IntVector2(childWidth, childHeight);
+            child.AssignedSize = new IntVector2(childWidth, childHeight);
             child.LocalPosition = new IntVector2(x, y);
             
             if (!rtl)
             {
-                y += childHeight;
+                x += childWidth;
             }
 
             totalChildrenX += childWidth;
             totalChildrenY = childHeight > totalChildrenY ? childHeight : totalChildrenY;
         }
         
-        var thisWidth = Math.Max(Size.X, 1);
-        var thisHeight = Math.Max(Size.Y, 1);;
+        var thisWidth = Math.Max(AssignedSize.X, 1);
+        var thisHeight = Math.Max(AssignedSize.Y, 1);;
         
         if ((Sizing & AxisSizing.ShrinkX) != 0)
         {
@@ -71,12 +71,12 @@ public class HStackContainer : Container
             thisHeight = totalChildrenY;
         }
 
-        Size = new IntVector2(thisWidth, thisHeight);
+        AssignedSize = new IntVector2(thisWidth, thisHeight);
 
         var toExpandX = Children.Where(el => (el.Sizing & AxisSizing.ExpandX) != 0).ToList();
         if (toExpandX.Count > 0)
         {
-            var unusedX = Size.X - totalChildrenX;
+            var unusedX = AssignedSize.X - totalChildrenX;
             var expandEach = unusedX / toExpandX.Count;
             foreach (var element in toExpandX)
             {
@@ -85,10 +85,10 @@ public class HStackContainer : Container
                 {
                     expandEach += unusedX;
                 }
-                element.Size = new IntVector2(element.Size.X + expandEach, element.Size.Y);
+                element.AssignedSize = new IntVector2(element.AssignedSize.X + expandEach, element.AssignedSize.Y);
             }
 
-            totalChildrenX = Size.X;
+            totalChildrenX = AssignedSize.X;
         }
         
         var toExpandY = Children.Where(el => (el.Sizing & AxisSizing.ExpandY) != 0).ToList();
@@ -96,10 +96,10 @@ public class HStackContainer : Container
         {
             foreach (var element in toExpandY)
             {
-                element.Size = new IntVector2(element.Size.X, Size.Y);
+                element.AssignedSize = new IntVector2(element.AssignedSize.X, AssignedSize.Y);
             }
 
-            totalChildrenY = Size.Y;
+            totalChildrenY = AssignedSize.Y;
         }
 
         ContentsSize = new IntVector2(totalChildrenX, totalChildrenY);
@@ -112,7 +112,7 @@ public class HStackContainer : Container
         var offsetX = 0;
         if ((ContentAlignment & Alignment.Right) != 0)
         {
-            offsetX = Size.X - ContentsSize.X;
+            offsetX = AssignedSize.X - ContentsSize.X;
         }  
         else if ((ContentAlignment & Alignment.Left) != 0)
         {
@@ -120,7 +120,7 @@ public class HStackContainer : Container
         } 
         else if ((ContentAlignment & Alignment.Center) != 0)
         {
-            offsetX = (Size.X - ContentsSize.X) / 2;
+            offsetX = (AssignedSize.X - ContentsSize.X) / 2;
         }
 
         foreach (var child in Children)
@@ -128,7 +128,7 @@ public class HStackContainer : Container
             var offsetY = 0;
             if ((ContentAlignment & Alignment.Bottom) != 0)
             {
-                offsetY = Size.Y - child.Size.Y;
+                offsetY = AssignedSize.Y - child.AssignedSize.Y;
             }  
             else if ((ContentAlignment & Alignment.Top) != 0)
             {
@@ -136,7 +136,7 @@ public class HStackContainer : Container
             } 
             else if ((ContentAlignment & Alignment.Center) != 0)
             {
-                offsetY = (Size.Y - child.Size.Y) / 2;
+                offsetY = (AssignedSize.Y - child.AssignedSize.Y) / 2;
             }
 
             child.LocalPosition += new IntVector2(offsetX, offsetY);

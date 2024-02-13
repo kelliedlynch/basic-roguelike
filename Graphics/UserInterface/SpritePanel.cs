@@ -19,8 +19,8 @@ public class SpritePanel : Container
     public void BuildPanel()
     {
         var spriteBatch = Game.Services.GetService<SpriteBatch>();
-        var tilesX = (int)Math.Ceiling((decimal)Size.X / TileSize.X);
-        var tilesY = (int)Math.Ceiling((decimal)Size.Y / TileSize.Y);
+        var tilesX = (int)Math.Ceiling((decimal)CalculatedSize.X / TileSize.X);
+        var tilesY = (int)Math.Ceiling((decimal)CalculatedSize.Y / TileSize.Y);
 
         for (int x = 0; x < tilesX ; x++)
         {
@@ -69,7 +69,7 @@ public class SpritePanel : Container
             }
         }
 
-        Size = TileSize * new IntVector2(tilesX, tilesY);
+        LayoutSize = TileSize * new IntVector2(tilesX, tilesY);
         // Console.WriteLine(Bounds);
     }
 

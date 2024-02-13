@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Roguelike.Graphics.Layout;
 
@@ -13,11 +14,20 @@ public class InventoryMenu : SpritePanel
         ListContainer = new VStackContainer(Game);
         ListContainer.Sizing = AxisSizing.ExpandXExpandY;
         AddChild(ListContainer);
+        // VisibleChanged += OnVisibleChanged;
     }
 
-    public override void Initialize()
+    protected override void OnVisibleChanged(object sender, EventArgs args)
     {
-        base.Initialize();
+        if (ListContainer is not null)
+        {
+            foreach (var child in ListContainer.Children)
+            {
+                child.Visible = Visible;
+            }
+        }
+
+        base.OnVisibleChanged(sender, args);
     }
 
     public override void LayoutElements()

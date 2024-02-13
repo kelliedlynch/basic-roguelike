@@ -36,12 +36,14 @@ public class Container : DrawableGameComponent
         get => _localPosition;
         set
         {
+            if (_localPosition == value) return;
             _localPosition = value;
             Outline.Bounds = Bounds;
-            foreach (var child in Children)
-            {
-                child.Outline.Bounds = child.Bounds;
-            }
+            
+            // foreach (var child in Children)
+            // {
+            //     child.Outline.Bounds = child.Bounds;
+            // }
         }
     }
 
@@ -49,18 +51,35 @@ public class Container : DrawableGameComponent
 
     public AxisSizing Sizing = AxisSizing.ShrinkXShrinkY;
 
-    public IntVector2 Size
+    public IntVector2 CalculatedSize
     {
         get
         {
-            var x = Math.Max(_size.X, MinSize.X);
-            var y = Math.Max(_size.Y, MinSize.Y);
+            var x = Math.Max(Math.Max(_assignedSize.X, MinSize.X), LayoutSize.X);
+            var y = Math.Max(Math.Max(_assignedSize.Y, MinSize.Y), LayoutSize.Y);
             return new IntVector2(x, y);
         }
-        set => _size = value;
     }
     
-    private IntVector2 _size = IntVector2.Zero;
+    public IntVector2 AssignedSize
+    {
+        get
+        {
+            // var x = Math.Max(Math.Max(_size.X, MinSize.X), LayoutSize.X);
+            // var y = Math.Max(Math.Max(_size.Y, MinSize.Y), LayoutSize.Y);
+            // return new IntVector2(x, y);
+            return _assignedSize;
+        }
+        set
+        {
+            if (_assignedSize == value) return;
+            _assignedSize = value;
+            SizeChanged?.Invoke(this);
+
+        }
+    }
+
+    private IntVector2 _assignedSize = IntVector2.Zero;
 
     public IntVector2 MinSize
     {
@@ -70,43 +89,71 @@ public class Container : DrawableGameComponent
             var y = Math.Max(_minSize.Y, ContentsSize.Y);
             return new IntVector2(x, y);
         }
-        set => _minSize = value;
+        set
+        {
+            if (_minSize == value) return;
+            _minSize = value;
+            SizeChanged?.Invoke(this);
+        }    
     }
     
     private IntVector2 _minSize = IntVector2.Zero;
-    public IntVector2 LayoutSize = IntVector2.Zero;
+
+    public IntVector2 LayoutSize
+    {
+        get => _layoutSize;
+        set
+        {
+            if (_layoutSize == value) return;
+            _layoutSize = value;
+            LayoutSizeChanged?.Invoke(this);
+        }
+    }
+
+    private IntVector2 _layoutSize = IntVector2.Zero;
 
     public Rectangle Bounds
     {
         get
         {
-            return new (Position, Size);
+            return new (Position, CalculatedSize);
         }
         set
         {
-            var oldSize = Size;
+            var oldSize = AssignedSize;
             Position = new IntVector2(value.X, value.Y);
-            Size = new IntVector2(value.Width, value.Height);
-            if (oldSize.X != Size.X)
+            AssignedSize = new IntVector2(value.Width, value.Height);
+            if (oldSize.X != AssignedSize.X)
             {
-                ChangedSize?.Invoke(this);
+                SizeChanged?.Invoke(this);
             }
 
-            if (oldSize.Y != Size.Y)
+            if (oldSize.Y != AssignedSize.Y)
             {
-                ChangedSize?.Invoke(this);
+                SizeChanged?.Invoke(this);
             }
         }
     }
 
     public delegate void SizeChangeEventHandler(Container sender);
 
-    public event SizeChangeEventHandler ChangedSize;
+    public event SizeChangeEventHandler SizeChanged;
+    public delegate void PositionChangeEventHandler(Container sender);
+
+    public event PositionChangeEventHandler PositionChanged;
+    
+    public event SizeChangeEventHandler LayoutSizeChanged;
+
+    // public delegate void DrawOrderChangeEventHandler(Container sender);
+    //
+    // public event DrawOrderChangeEventHandler ChangedDrawOrder;
     
     public Container(Game game) : base(game)
     {
         Outline = new RectangleShape(Game);
         Game.Components.Add(Outline);
+        SizeChanged += OnSizeChanged;
+        PositionChanged += OnPositionChanged;
     }
     
     public Container(Game game, Rectangle bounds) : this(game)
@@ -117,18 +164,34 @@ public class Container : DrawableGameComponent
     protected override void OnVisibleChanged(object sender, EventArgs args)
     {
         Outline.Visible = Visible;
+        if (Visible) LayoutElements();
         base.OnVisibleChanged(sender, args);
     }
 
+    protected void OnSizeChanged(object sender)
+    {
+        // Outline.Visible = Visible;
+        if (Visible) LayoutElements();
+        // base.OnSizeChanged(sender, args);
+    }
+
+    protected void OnPositionChanged(object sender)
+    {
+        if (Visible) LayoutElements();
+    }
+    
     public void AddChild(Container e)
     {
         e.Parent = this;
 
-        ChangedSize += e.OnParentChangedSize;
-        e.ChangedSize += OnChildChangedSize;
+        SizeChanged += e.OnParentSizeChanged;
+        // PositionChanged += e.OnPositionChanged;
+        e.SizeChanged += OnChildSizeChanged;
+        DrawOrderChanged += e.OnParentDrawOrderChanged;
         e.DrawOrder = DrawOrder + 1;
         Children.Add(e);
         Game.Components.Add(e);
+        if (Visible) LayoutElements();
     }
 
     public void RemoveChildren()
@@ -141,20 +204,25 @@ public class Container : DrawableGameComponent
         Children.Clear();
     }
 
-    protected virtual void OnParentChangedSize(Container e)
+    protected virtual void OnParentDrawOrderChanged(object sender, EventArgs args)
     {
-        if ((Sizing & (AxisSizing.ExpandX | AxisSizing.ExpandY)) != 0)
-        {
-            Parent.LayoutElements();
-        }
+        DrawOrder = Parent.DrawOrder + 1;
     }
 
-    public virtual void OnChildChangedSize(Container e)
+    protected virtual void OnParentSizeChanged(Container e)
     {
-        if ((Sizing & (AxisSizing.ShrinkX | AxisSizing.ShrinkY)) != 0)
-        {
-            LayoutElements();
-        }
+        // if ((Sizing & (AxisSizing.ExpandX | AxisSizing.ExpandY)) != 0)
+        // {
+        //     Parent.LayoutElements();
+        // }
+    }
+
+    public virtual void OnChildSizeChanged(Container e)
+    {
+        // if ((Sizing & (AxisSizing.ShrinkX | AxisSizing.ShrinkY)) != 0)
+        // {
+        //     LayoutElements();
+        // }
     }
     
     public virtual void LayoutElements()
@@ -169,60 +237,61 @@ public class Container : DrawableGameComponent
 
     protected virtual void AlignChildren()
     {
-        // foreach (var child in Children)
-        // {
-        //     var offsetX = 0;
-        //     if ((ContentAlignment & Alignment.Right) != 0)
-        //     {
-        //         offsetX = Size.X - child.Size.X;
-        //     }  
-        //     else if ((ContentAlignment & Alignment.Left) != 0)
-        //     {
-        //         offsetX = 0;
-        //     } 
-        //     else if ((ContentAlignment & Alignment.Center) != 0)
-        //     {
-        //         offsetX = (Size.X - child.Size.X) / 2;
-        //     }
-        //     
-        //     var offsetY = 0;
-        //     if ((ContentAlignment & Alignment.Bottom) != 0)
-        //     {
-        //         offsetY = Size.Y - child.Size.Y;
-        //     }  
-        //     else if ((ContentAlignment & Alignment.Top) != 0)
-        //     {
-        //         offsetY = 0;
-        //     } 
-        //     else if ((ContentAlignment & Alignment.Center) != 0)
-        //     {
-        //         offsetY = (Size.Y - child.Size.Y) / 2;
-        //     }
-        //
-        //     child.LocalPosition += new IntVector2(offsetX, offsetY);
-        // }
+        foreach (var child in Children)
+        {
+            var offsetX = 0;
+            if ((ContentAlignment & Alignment.Right) != 0)
+            {
+                offsetX = CalculatedSize.X - child.CalculatedSize.X;
+            }  
+            else if ((ContentAlignment & Alignment.Left) != 0)
+            {
+                offsetX = 0;
+            } 
+            else if ((ContentAlignment & Alignment.Center) != 0)
+            {
+                offsetX = (CalculatedSize.X - child.CalculatedSize.X) / 2;
+            }
+            
+            var offsetY = 0;
+            if ((ContentAlignment & Alignment.Bottom) != 0)
+            {
+                offsetY = CalculatedSize.Y - child.CalculatedSize.Y;
+            }  
+            else if ((ContentAlignment & Alignment.Top) != 0)
+            {
+                offsetY = 0;
+            } 
+            else if ((ContentAlignment & Alignment.Center) != 0)
+            {
+                offsetY = (CalculatedSize.Y - child.CalculatedSize.Y) / 2;
+            }
+        
+            child.LocalPosition += new IntVector2(offsetX, offsetY);
+        }
     }
 
     public override void Draw(GameTime gameTime)
     {
-        if (Parent is null)
-        {
-            LayoutElements();
-        }
+        // if (Parent is null)
+        // {
+        //     LayoutElements();
+        // }
 
-        if (Debug)
+        if (Debug && Visible)
         {
             Outline.DrawOrder = DrawOrder + 1;
             Outline.Bounds = Bounds;
+            Outline.Visible = true;
             // if (Visible)
             // {
             //     Outline.Visible = true;
             // }
         }
-        // else
-        // {
-        //     Outline.Visible = false;
-        // }
+        else
+        {
+            Outline.Visible = false;
+        }
         
         base.Draw(gameTime);
     }
