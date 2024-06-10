@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Roguelike.UserInterface;
@@ -13,9 +14,9 @@ public class TextLabel : Container
         get => _text;
         set
         {
+            if (_text == value) return;
             _text = value;
             MinSize = Font.MeasureString(value).ToIntVector2();
-            LayoutElements();
         }
     }
 
@@ -28,7 +29,7 @@ public class TextLabel : Container
     public TextLabel(Game game) : base(game)
     {
         Font = game.Services.GetService<SpriteFont>();
-        LayoutSizeChanged += OnLayoutSizeChanged;
+        // LayoutSizeChanged += OnLayoutSizeChanged;
     }
 
     public TextLabel(Game game, Rectangle bounds) : this(game)
@@ -50,35 +51,52 @@ public class TextLabel : Container
         // Size = s.ToIntVector2();
     }
 
-    public void OnLayoutSizeChanged(Container sender)
+    // public void OnLayoutSizeChanged(Container sender)
+    // {
+    //     LayoutElements();
+    // }
+
+    public override void SetChildrenLayoutSizes()
     {
-        LayoutElements();
-    }
-    
-    public override void LayoutElements()
-    {
+        if (Text == "0")
+        {
+            var a = 0;
+        }
         var textSize = Font.MeasureString(Text).ToIntVector2();
-        var padding = CalculatedSize - textSize;
-        var offsetX = padding.X / 2;
-        var offsetY = padding.Y / 2;
-        if ((ContentAlignment & Alignment.Top) != 0)
+        ContentsSize = textSize;
+        if (Parent is null || (Sizing & (AxisSizing.ExpandX | AxisSizing.ExpandY)) == 0)
         {
-            offsetY = 0;
+            FinalLayoutSize = textSize;
         }
-        else if ((ContentAlignment & Alignment.Bottom) != 0)
+        else
         {
-            offsetY = padding.Y;
+            LayoutSize  = textSize;
         }
-        if ((ContentAlignment & Alignment.Left) != 0)
-        {
-            offsetX = 0;
-        }
-        else if ((ContentAlignment & Alignment.Right) != 0)
-        {
-            offsetX = padding.X;
-        }
-        
-        TextPosition = new IntVector2(offsetX, offsetY);
+    }
+
+    public override void SetLocalPositions()
+    {
+        // var padding = DisplayedSize - ContentsSize;
+        // var offsetX = padding.X / 2;
+        // var offsetY = padding.Y / 2;
+        // if ((ContentAlignment & Alignment.Top) != 0)
+        // {
+        //     offsetY = 0;
+        // }
+        // else if ((ContentAlignment & Alignment.Bottom) != 0)
+        // {
+        //     offsetY = padding.Y;
+        // }
+        // if ((ContentAlignment & Alignment.Left) != 0)
+        // {
+        //     offsetX = 0;
+        // }
+        // else if ((ContentAlignment & Alignment.Right) != 0)
+        // {
+        //     offsetX = padding.X;
+        // }
+        //
+        // TextPosition = new IntVector2(offsetX, offsetY);
     }
 
     public override void Draw(GameTime gameTime)

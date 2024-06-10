@@ -19,8 +19,8 @@ public class SpritePanel : Container
     public void BuildPanel()
     {
         var spriteBatch = Game.Services.GetService<SpriteBatch>();
-        var tilesX = (int)Math.Ceiling((decimal)CalculatedSize.X / TileSize.X);
-        var tilesY = (int)Math.Ceiling((decimal)CalculatedSize.Y / TileSize.Y);
+        var tilesX = (int)Math.Ceiling((decimal)DisplayedSize.X / TileSize.X);
+        var tilesY = (int)Math.Ceiling((decimal)DisplayedSize.Y / TileSize.Y);
 
         for (int x = 0; x < tilesX ; x++)
         {

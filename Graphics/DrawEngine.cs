@@ -45,7 +45,7 @@ public class DrawEngine : DrawableGameComponent
         // topBar.Size = new IntVector2(0, 48);
         topBar.Debug = true;
         topBar.Outline.BorderColor = Color.Red;
-        topBar.Visible = false;
+        // topBar.Visible = false;
         // topBar.TextLabel.Text = $"$ {player.Money}  Lv. {player.Location.Z}  Atk. {player.CalculatedAtk}";
         screenContainer.AddChild(topBar);
 

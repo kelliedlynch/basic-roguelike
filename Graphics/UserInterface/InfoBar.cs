@@ -47,15 +47,54 @@ public class InfoBar : SpritePanel
         _layoutContainer = new HStackContainer(Game);
         _layoutContainer.Sizing = AxisSizing.ExpandXExpandY;
         _layoutContainer.ContentAlignment = Alignment.Center;
+        _layoutContainer.Debug = true;
+        _layoutContainer.Outline.BorderColor = Color.White;
+        _layoutContainer.ChildSpacing = 10;
         AddChild(_layoutContainer);
 
         _mIconContainer = new Container(Game);
         _mIconContainer.Sizing = AxisSizing.FixedXFixedY;
         _mIconContainer.AssignedSize = TileSize;
+        _mIconContainer.Debug = true;
         _layoutContainer.AddChild(_mIconContainer);
 
         _mLabel = new TextLabel(Game);
+        _mLabel.Debug = true;
+        _mLabel.Outline.BorderColor = Color.Orange;
         _layoutContainer.AddChild(_mLabel);
+        
+        _sIconContainer = new Container(Game);
+        _sIconContainer.Sizing = AxisSizing.FixedXFixedY;
+        _sIconContainer.AssignedSize = TileSize;
+        _sIconContainer.Debug = true;
+        _layoutContainer.AddChild(_sIconContainer);
+        
+        _sLabel = new TextLabel(Game);
+        _sLabel.Debug = true;
+        _sLabel.Outline.BorderColor = Color.Orange;
+        _layoutContainer.AddChild(_sLabel);
+
+        _hIconContainer = new Container(Game);
+        _hIconContainer.Sizing = AxisSizing.FixedXFixedY;
+        _hIconContainer.AssignedSize = TileSize;
+        _hIconContainer.Debug = true;
+        _layoutContainer.AddChild(_hIconContainer);
+        
+        _hLabel = new TextLabel(Game);
+        _hLabel.Debug = true;
+        _hLabel.Outline.BorderColor = Color.Orange;
+        _layoutContainer.AddChild(_hLabel);
+        
+        _swIconContainer = new Container(Game);
+        _swIconContainer.Sizing = AxisSizing.FixedXFixedY;
+        _swIconContainer.AssignedSize = TileSize;
+        _swIconContainer.Debug = true;
+        _layoutContainer.AddChild(_swIconContainer);
+
+        _swLabel = new TextLabel(Game);
+        _swLabel.Debug = true;
+        _swLabel.Outline.BorderColor = Color.Orange;
+        _layoutContainer.AddChild(_swLabel);
 
     }
 
@@ -70,9 +109,13 @@ public class InfoBar : SpritePanel
         var dungeonLevel = Game.Services.GetService<LevelManager>().CurrentLevelNumber;
         var font = Game.Services.GetService<SpriteFont>();
         _mLabel.Text = player.Money.ToString();
-        var mSize = font.MeasureString(_mLabel.Text).ToIntVector2();
+
+        _sLabel.Text = dungeonLevel.ToString();
         
-        _playerAtk = player.CalculatedAtk;
+        _hLabel.Text = player.Hp.ToString();
+        
+        _swLabel.Text = player.CalculatedAtk.ToString();
+        
         _dungeonLevel = dungeonLevel;
         base.Update(gameTime);
     }
@@ -89,6 +132,9 @@ public class InfoBar : SpritePanel
         
         var texture = Game.Content.Load<Texture2D>("Graphics/monochrome-transparent_packed");
         spriteBatch.Draw(texture, _mIconContainer.Bounds, mIconRect, Color.Gold);
+        spriteBatch.Draw(texture, _sIconContainer.Bounds, sIconRect, Color.Tan);
+        spriteBatch.Draw(texture, _hIconContainer.Bounds, hIconRect, Color.Red);
+        spriteBatch.Draw(texture, _swIconContainer.Bounds, swIconRect, Color.Silver);
         
         
     }

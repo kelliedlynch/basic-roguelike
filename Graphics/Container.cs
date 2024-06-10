@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Roguelike.Graphics.Layout;
@@ -51,12 +52,12 @@ public class Container : DrawableGameComponent
 
     public AxisSizing Sizing = AxisSizing.ShrinkXShrinkY;
 
-    public IntVector2 CalculatedSize
+    public IntVector2 DisplayedSize
     {
         get
         {
-            var x = Math.Max(Math.Max(_assignedSize.X, MinSize.X), LayoutSize.X);
-            var y = Math.Max(Math.Max(_assignedSize.Y, MinSize.Y), LayoutSize.Y);
+            var x = Math.Max(Math.Max(AssignedSize.X, MinSize.X), FinalLayoutSize.X);
+            var y = Math.Max(Math.Max(AssignedSize.Y, MinSize.Y), FinalLayoutSize.Y);
             return new IntVector2(x, y);
         }
     }
@@ -99,27 +100,39 @@ public class Container : DrawableGameComponent
     
     private IntVector2 _minSize = IntVector2.Zero;
 
-    public IntVector2 LayoutSize
+    protected internal IntVector2 LayoutSize
     {
         get => _layoutSize;
         set
         {
             if (_layoutSize == value) return;
             _layoutSize = value;
-            LayoutSizeChanged?.Invoke(this);
+            // SizeChanged?.Invoke(this);
         }
     }
 
     private IntVector2 _layoutSize = IntVector2.Zero;
+    
+    // A container's FinalLayoutSize should ONLY be set after all its children are finalized (is this FinalLayoutSize or LayoutSize?)
+    protected internal IntVector2 FinalLayoutSize
+    {
+        get => _finalLayoutSize;
+        set
+        {
+            if (_finalLayoutSize == value) return;
+            _finalLayoutSize = value;
+            SizeChanged?.Invoke(this);
+        }
+    }
+
+    private IntVector2 _finalLayoutSize = IntVector2.Zero;
 
     public Rectangle Bounds
     {
-        get
-        {
-            return new (Position, CalculatedSize);
-        }
+        get =>  new (Position, DisplayedSize);
         set
         {
+            // TODO: THIS NEEDS TO BE EXAMINED LATER
             var oldSize = AssignedSize;
             Position = new IntVector2(value.X, value.Y);
             AssignedSize = new IntVector2(value.Width, value.Height);
@@ -152,7 +165,7 @@ public class Container : DrawableGameComponent
     {
         Outline = new RectangleShape(Game);
         Game.Components.Add(Outline);
-        SizeChanged += OnSizeChanged;
+        // SizeChanged += OnSizeChanged;
         PositionChanged += OnPositionChanged;
     }
     
@@ -171,7 +184,7 @@ public class Container : DrawableGameComponent
     protected void OnSizeChanged(object sender)
     {
         // Outline.Visible = Visible;
-        if (Visible) LayoutElements();
+        // if (Visible) LayoutElements();
         // base.OnSizeChanged(sender, args);
     }
 
@@ -223,16 +236,102 @@ public class Container : DrawableGameComponent
         // {
         //     LayoutElements();
         // }
+        // TODO: THIS IS WHERE MY PROBLEM IS. I NEED TO REDO LAYOUT WHEN CHILD SIZE CHANGES, BUT NOT IN A WAY THAT CREATES AN ENDLESS LOOP
+        LayoutElements();
     }
     
     public virtual void LayoutElements()
     {
+        SetChildrenLayoutSizes();
+        SetThisLayoutSize();
+        AdjustExpandableChildren();
+        SetLocalPositions();
+        AlignChildren();
+    }
+
+    public virtual void SetChildrenLayoutSizes()
+    {
+        var totalChildrenX = 0;
+        var totalChildrenY = 0;
         foreach (var child in Children)
         {
-            // child.Position = Position + child.LocalPosition;
             child.LayoutElements();
+            totalChildrenX = child.DisplayedSize.X > totalChildrenX ? child.DisplayedSize.X : totalChildrenX;
+            totalChildrenY = child.DisplayedSize.Y > totalChildrenY ? child.DisplayedSize.Y : totalChildrenY;
         }
-        AlignChildren();
+        
+        var thisWidth = Math.Max(DisplayedSize.X, 1);
+        var thisHeight = Math.Max(DisplayedSize.Y, 1);;
+        
+        if ((Sizing & AxisSizing.ShrinkX) != 0)
+        {
+            thisWidth = totalChildrenX;
+        }
+        if ((Sizing & AxisSizing.ShrinkY) != 0)
+        {
+            thisHeight = totalChildrenY;
+        }
+
+        if (Parent is null || (Sizing & (AxisSizing.ExpandX | AxisSizing.ExpandY)) == 0)
+        {
+            FinalLayoutSize = new IntVector2(thisWidth, thisHeight);
+        }
+        else
+        {
+            LayoutSize  = new IntVector2(thisWidth, thisHeight);
+        }
+        
+        ContentsSize = new IntVector2(totalChildrenX, totalChildrenY);
+    }
+
+    public virtual void SetLocalPositions()
+    {
+        
+    }
+
+    public virtual void SetThisLayoutSize()
+    {
+        var thisWidth = Math.Max(DisplayedSize.X, 1);
+        var thisHeight = Math.Max(DisplayedSize.Y, 1);;
+        
+        if ((Sizing & AxisSizing.ShrinkX) != 0)
+        {
+            thisWidth = ContentsSize.X;
+        }
+        if ((Sizing & AxisSizing.ShrinkY) != 0)
+        {
+            thisHeight = ContentsSize.Y;
+        }
+
+        if (Parent is null || (Sizing & (AxisSizing.ExpandX | AxisSizing.ExpandY)) == 0)
+        {
+            FinalLayoutSize = new IntVector2(thisWidth, thisHeight);
+        }
+        else
+        {
+            LayoutSize  = new IntVector2(thisWidth, thisHeight);
+        }
+        
+    }
+
+    public virtual void AdjustExpandableChildren()
+    {
+        foreach (var child in Children)
+        {
+            var childWidth = child.DisplayedSize.X;
+            var childHeight = child.DisplayedSize.Y;
+            if ((child.Sizing & AxisSizing.ExpandX) != 0)
+            {
+                childWidth = DisplayedSize.X;
+            }
+            if ((child.Sizing & AxisSizing.ExpandY) != 0)
+            {
+                childHeight = DisplayedSize.Y;
+            }
+
+            child.FinalLayoutSize = new IntVector2(childWidth, childHeight);
+        }
+        
     }
 
     protected virtual void AlignChildren()
@@ -242,7 +341,7 @@ public class Container : DrawableGameComponent
             var offsetX = 0;
             if ((ContentAlignment & Alignment.Right) != 0)
             {
-                offsetX = CalculatedSize.X - child.CalculatedSize.X;
+                offsetX = DisplayedSize.X - child.DisplayedSize.X;
             }  
             else if ((ContentAlignment & Alignment.Left) != 0)
             {
@@ -250,13 +349,13 @@ public class Container : DrawableGameComponent
             } 
             else if ((ContentAlignment & Alignment.Center) != 0)
             {
-                offsetX = (CalculatedSize.X - child.CalculatedSize.X) / 2;
+                offsetX = (DisplayedSize.X - child.DisplayedSize.X) / 2;
             }
             
             var offsetY = 0;
             if ((ContentAlignment & Alignment.Bottom) != 0)
             {
-                offsetY = CalculatedSize.Y - child.CalculatedSize.Y;
+                offsetY = DisplayedSize.Y - child.DisplayedSize.Y;
             }  
             else if ((ContentAlignment & Alignment.Top) != 0)
             {
@@ -264,7 +363,7 @@ public class Container : DrawableGameComponent
             } 
             else if ((ContentAlignment & Alignment.Center) != 0)
             {
-                offsetY = (CalculatedSize.Y - child.CalculatedSize.Y) / 2;
+                offsetY = (DisplayedSize.Y - child.DisplayedSize.Y) / 2;
             }
         
             child.LocalPosition += new IntVector2(offsetX, offsetY);
@@ -295,15 +394,6 @@ public class Container : DrawableGameComponent
         
         base.Draw(gameTime);
     }
-
-    // public virtual void AddToBatch(SpriteBatch batch)
-    // {
-    //     foreach (var element in Children)
-    //     {
-    //         element.AddToBatch(batch);            
-    //     };
-    // }
-
 }
 
 public enum SizingMode

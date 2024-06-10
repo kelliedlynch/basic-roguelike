@@ -41,16 +41,16 @@ public class DialogBox : SpritePanel
     public override void LayoutElements()
     {
         // TextLabel.LayoutElements();
-        var sizeX = Math.Max(CalculatedSize.X, MinSize.X);
-        var sizeY = Math.Max(CalculatedSize.Y, MinSize.Y);
+        var sizeX = Math.Max(DisplayedSize.X, MinSize.X);
+        var sizeY = Math.Max(DisplayedSize.Y, MinSize.Y);
         if ((Sizing & AxisSizing.ShrinkX) != 0)
         {
-            sizeX = Math.Max(MinSize.X, TextLabel.CalculatedSize.X);
+            sizeX = Math.Max(MinSize.X, TextLabel.DisplayedSize.X);
             sizeX += PaddingLeft + PaddingRight;
         }
         if ((Sizing & AxisSizing.ShrinkY) != 0)
         {
-            sizeY = Math.Max(MinSize.Y, TextLabel.CalculatedSize.Y);
+            sizeY = Math.Max(MinSize.Y, TextLabel.DisplayedSize.Y);
             sizeY += PaddingTop + PaddingBottom;
         }
 
@@ -60,8 +60,8 @@ public class DialogBox : SpritePanel
         AssignedSize = new IntVector2(tilesX, tilesY) * TileSize;
 
 
-        var safeAreaSize = new IntVector2(CalculatedSize.X - PaddingLeft - PaddingRight, CalculatedSize.Y - PaddingTop - PaddingBottom);
-        var padding = CalculatedSize - TextLabel.CalculatedSize;
+        var safeAreaSize = new IntVector2(DisplayedSize.X - PaddingLeft - PaddingRight, DisplayedSize.Y - PaddingTop - PaddingBottom);
+        var padding = DisplayedSize - TextLabel.DisplayedSize;
         var offsetX = padding.X / 2 + PaddingLeft;
         var offsetY = padding.Y / 2 + PaddingTop;
         if ((ContentAlignment & Alignment.Left) != 0)

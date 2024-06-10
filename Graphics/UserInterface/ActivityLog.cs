@@ -42,7 +42,7 @@ public class ActivityLog : DialogBox
         //
         // var spriteBatch = Game.Services.GetService<SpriteBatch>();
         TextLabel.Text = "";
-        while (textHeight < CalculatedSize.Y - PaddingTop - PaddingBottom)
+        while (textHeight < DisplayedSize.Y - PaddingTop - PaddingBottom)
         {
             if (Messages.Count < lineNumber) break;
             // currentY -= (lineHeight + LineSpacing) * lineNumber;
