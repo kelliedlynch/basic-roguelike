@@ -13,6 +13,7 @@ public class InventoryMenu : SpritePanel
         Visible = false;
         ListContainer = new VStackContainer(Game);
         ListContainer.Sizing = AxisSizing.ExpandXExpandY;
+        
         AddChild(ListContainer);
         // VisibleChanged += OnVisibleChanged;
     }
@@ -42,7 +43,7 @@ public class InventoryMenu : SpritePanel
                 label.Text = "* " + item.Name;
             }
             ListContainer.AddChild(label);
-            label.Debug = true;
+            // label.Debug = true;
         }
 
         foreach (var child in Children)
@@ -50,19 +51,5 @@ public class InventoryMenu : SpritePanel
             child.LayoutElements();
         }
     }
-
-    // protected override void OnVisibleChanged(object sender, EventArgs args)
-    // {
-    //     if (Visible)
-    //     {
-    //         BuildLayout();
-    //     }
-    //     base.OnVisibleChanged(sender, args);
-    // }
-
-    // public override void Draw(GameTime gameTime)
-    // {
-    //     BuildLayout();
-    //     base.Draw(gameTime);
-    // }
+    
 }

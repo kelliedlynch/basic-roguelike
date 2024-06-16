@@ -17,6 +17,7 @@ public class Container : DrawableGameComponent
     public bool Debug = false;
     public RectangleShape Outline;
     public List<Container> Children = new();
+    public IntVector4 Padding = new IntVector4(0, 0, 0, 0);
 
     public IntVector2 Position
     {

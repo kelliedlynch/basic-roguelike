@@ -153,16 +153,8 @@ public class DrawEngine : DrawableGameComponent
         // Draw Player
         var player = Game.Services.GetService<PlayerManager>().Player;
         DrawSpriteAtLocation(player, player.Location.To2D, spriteBatch);
-        //
-        // DrawTopBar(spriteBatch, player);
-        //
-        //
-        //
-
-        // log.BoxAlignment = Alignment.BottomCenter;
-        // log.DrawBox(spriteBatch);
-        //
-        //
+       
+        
         if (Game.Services.GetService<InputManager>().GameState == GameRunningState.GameOver)
         {
             var gameOverMsg = new DialogBox(Game);

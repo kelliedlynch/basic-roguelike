@@ -10,6 +10,10 @@ public struct IntVector3 : IEquatable<IntVector3>
     public int X;
     public int Y;
     public int Z;
+    
+    public static IntVector3 Zero => new IntVector3(0, 0, 0);
+    public static IntVector3 One => new IntVector3(1, 1, 1);
+    public static IntVector3 Two => new IntVector3(2, 2, 2);
 
     public IntVector2 To2D => new(X, Y);
 
@@ -44,7 +48,7 @@ public struct IntVector3 : IEquatable<IntVector3>
 
         if (obj is Vector2)
         {
-            return _equalsXNAVector3((Vector2)obj);
+            return _equalsXNAVector3((Vector3)obj);
         }
 
         return false;
@@ -57,15 +61,16 @@ public struct IntVector3 : IEquatable<IntVector3>
 
     private bool _equalsIntVector3(IntVector3 obj)
     {
-        return obj.X == X && obj.Y == Y;
+        return obj.X == X && obj.Y == Y && obj.Z == Z;
     }
 
-    private bool _equalsXNAVector3(Vector2 obj)
+    private bool _equalsXNAVector3(Vector3 obj)
     {
         var diffX = Math.Abs(obj.X - X);
         var diffY = Math.Abs(obj.Y - Y);
+        var diffZ = Math.Abs(obj.Z - Z);
         // NOTE: Adjust this value if you want to change the precision of equality checks.
-        return diffX < .00001f && diffY < .00001f;
+        return diffX < .00001f && diffY < .00001f && diffZ < .00001f;
     }
 
     public static bool operator ==(IntVector3 left, object right)
