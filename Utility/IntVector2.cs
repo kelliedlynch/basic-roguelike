@@ -12,6 +12,12 @@ public struct IntVector2 : IEquatable<IntVector2>
     public static IntVector2 One => new IntVector2(1, 1);
     public static IntVector2 Two => new IntVector2(2, 2);
 
+    public IntVector2(Vector2 v) : this()
+    {
+        X = (int)v.X;
+        Y = (int)v.Y;
+    }
+    
     public IntVector2(int x, int y)
     {
         X = x;

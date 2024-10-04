@@ -41,17 +41,12 @@ public struct IntVector3 : IEquatable<IntVector3>
 
     public override bool Equals(object obj)
     {
-        if (obj is IntVector3)
+        return obj switch
         {
-            return _equalsIntVector3((IntVector3)obj);
-        }
-
-        if (obj is Vector2)
-        {
-            return _equalsXNAVector3((Vector3)obj);
-        }
-
-        return false;
+            IntVector3 intVector3 => _equalsIntVector3(intVector3),
+            Vector3 xVector3 => _equalsXNAVector3(xVector3),
+            _ => false
+        };
     }
 
     public override int GetHashCode()

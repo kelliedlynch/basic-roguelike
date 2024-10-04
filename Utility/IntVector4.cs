@@ -12,6 +12,10 @@ public struct IntVector4 : IEquatable<IntVector4>
     public int Z;
     public int W;
 
+    public static IntVector4 Zero => new IntVector4(0, 0, 0, 0);
+    public static IntVector4 One => new IntVector4(1, 1, 1, 1);
+    public static IntVector4 Two => new IntVector4(2, 2, 2, 2);
+    
     public IntVector2 To2D => new(X, Y);
 
     public IntVector3 To3D => new(X, Y, Z);
